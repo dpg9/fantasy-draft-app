@@ -6,7 +6,7 @@ const Timer = ({ initialTime, onTimeUp, resetTrigger, isPaused, onTogglePause, o
     const [isActive, setIsActive] = useState(!isPaused);
     const timerRef = useRef(null);
 
-    // EFFECT 1: Reset the timer ONLY when a new pick happens or settings change
+    // EFFECT 1: Reset the timer ONLY when a new pick happens, settings change, or manual reset
     useEffect(() => {
         console.log(`Timer Reset Triggered: initialTime=${initialTime}`);
         setTimeLeft(initialTime);

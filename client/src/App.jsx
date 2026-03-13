@@ -130,9 +130,10 @@ function App() {
                 settings={data.settings}
                 onUpdateSettings={async (s) => { 
                   await updateSettings(s); 
-                  setLastPickTime(Date.now()); // Reset timer visually
-                  setIsPaused(true); // Pause it to let user start
-                  loadData(); 
+                  const state = await fetchState(); // Get fresh state
+                  setData(state);
+                  setLastPickTime(Date.now()); // FORCE RE-RENDER OF TIMER
+                  setIsPaused(true); 
                   alert('Settings updated successfully!');
                 }}
                 onAddTeam={async (team) => { await addTeam(team); loadData(); }}
