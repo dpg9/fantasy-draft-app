@@ -45,6 +45,7 @@ function App() {
       } else {
         soundService.playPick();
         setLastPickTime(Date.now());
+        setIsPaused(false); // Auto-start next pick timer
         loadData();
       }
     } catch (err) {
@@ -129,6 +130,7 @@ function App() {
                   setLastPickTime(Date.now()); // Reset timer visually
                   setIsPaused(true); // Pause it to let user start
                   loadData(); 
+                  alert('Settings updated successfully!');
                 }}
                 onAddTeam={async (team) => { await addTeam(team); loadData(); }}
                 onDeleteTeam={async (id) => { await deleteTeam(id); loadData(); }}

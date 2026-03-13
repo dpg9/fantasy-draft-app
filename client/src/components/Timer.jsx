@@ -1,38 +1,41 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { soundService } from '../SoundService';
 
 const Timer = ({ initialTime, onTimeUp, resetTrigger, isPaused, onTogglePause, onReset }) => {
     const [timeLeft, setTimeLeft] = useState(initialTime);
-    const [isActive, setIsActive] = useState(false);
+    const [isActive, setIsActive] = useState(!isPaused);
+    const timerRef = useRef(null);
 
+    // Sync timeLeft when initialTime changes or a reset is triggered
     useEffect(() => {
+        console.log(`Timer Sync: initialTime=${initialTime}, isPaused=${isPaused}`);
         setTimeLeft(initialTime);
         setIsActive(!isPaused);
-    }, [resetTrigger, initialTime]);
+    }, [resetTrigger, initialTime, isPaused]);
 
     useEffect(() => {
-        setIsActive(!isPaused);
-    }, [isPaused]);
-
-    useEffect(() => {
-        let interval = null;
         if (isActive && timeLeft > 0) {
-            interval = setInterval(() => {
-                const newTime = timeLeft - 1;
-                setTimeLeft(newTime);
-                
-                // Play warning sound every second under 10 seconds
-                if (newTime < 10 && newTime >= 0) {
-                    soundService.playWarning();
-                }
+            timerRef.current = setInterval(() => {
+                setTimeLeft((prev) => {
+                    const next = prev - 1;
+                    if (next < 10 && next >= 0) {
+                        soundService.playWarning();
+                    }
+                    if (next <= 0) {
+                        clearInterval(timerRef.current);
+                        setIsActive(false);
+                        soundService.playBuzzer();
+                        if (onTimeUp) onTimeUp();
+                        return 0;
+                    }
+                    return next;
+                });
             }, 1000);
-        } else if (timeLeft === 0 && isActive) {
-            setIsActive(false);
-            soundService.playBuzzer();
-            if (onTimeUp) onTimeUp();
+        } else {
+            clearInterval(timerRef.current);
         }
-        return () => clearInterval(interval);
-    }, [isActive, timeLeft, onTimeUp]);
+        return () => clearInterval(timerRef.current);
+    }, [isActive, onTimeUp]); // Only depend on isActive to avoid double intervals
 
     const formatTime = (seconds) => {
         const m = Math.floor(seconds / 60);
@@ -47,19 +50,19 @@ const Timer = ({ initialTime, onTimeUp, resetTrigger, isPaused, onTogglePause, o
 
     return (
         <div className="flex flex-col items-center gap-2">
-            <div className={`text-4xl font-bold font-mono ${timeLeft < 10 ? 'text-red-500 animate-pulse' : 'text-gray-800'}`}>
+            <div className={`text-4xl font-bold font-mono ${timeLeft < 10 && timeLeft > 0 ? 'text-red-500 animate-pulse' : 'text-gray-800'}`}>
                 {formatTime(timeLeft)}
             </div>
             <div className="flex gap-2">
                 <button 
                     onClick={onTogglePause}
-                    className="bg-gray-600 hover:bg-gray-700 text-white text-xs px-2 py-1 rounded uppercase font-bold"
+                    className={`${isPaused ? 'bg-green-600 hover:bg-green-700' : 'bg-yellow-600 hover:bg-yellow-700'} text-white text-xs px-3 py-1 rounded uppercase font-black transition-colors`}
                 >
                     {isPaused ? 'Start' : 'Stop'}
                 </button>
                 <button 
                     onClick={handleReset}
-                    className="bg-gray-400 hover:bg-gray-500 text-white text-xs px-2 py-1 rounded uppercase font-bold"
+                    className="bg-gray-500 hover:bg-gray-600 text-white text-xs px-3 py-1 rounded uppercase font-black transition-colors"
                 >
                     Reset
                 </button>
