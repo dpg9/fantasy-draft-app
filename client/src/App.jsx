@@ -124,7 +124,12 @@ function App() {
             <TeamSettings 
                 teams={data.teams}
                 settings={data.settings}
-                onUpdateSettings={async (s) => { await updateSettings(s); loadData(); }}
+                onUpdateSettings={async (s) => { 
+                  await updateSettings(s); 
+                  setLastPickTime(Date.now()); // Reset timer visually
+                  setIsPaused(true); // Pause it to let user start
+                  loadData(); 
+                }}
                 onAddTeam={async (team) => { await addTeam(team); loadData(); }}
                 onDeleteTeam={async (id) => { await deleteTeam(id); loadData(); }}
                 onUpload={handleUpload}

@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTeam, onDeleteTeam, onUpload, onReset }) => {
     const [newTeamName, setNewTeamName] = useState('');
     const [newOwnerName, setNewOwnerName] = useState('');
     const [newAvatarUrl, setNewAvatarUrl] = useState('');
     const [pickTime, setPickTime] = useState(settings?.timePerPick || 120);
+
+    useEffect(() => {
+        if (settings?.timePerPick) {
+            setPickTime(settings.timePerPick);
+        }
+    }, [settings]);
 
     const handleUpdateSettings = () => {
         onUpdateSettings({ timePerPick: parseInt(pickTime) });
