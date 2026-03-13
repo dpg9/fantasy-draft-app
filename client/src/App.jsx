@@ -29,9 +29,12 @@ function App() {
 
   useEffect(() => {
     loadData();
-    const interval = setInterval(loadData, 2000); // Poll every 2s
-    return () => clearInterval(interval);
-  }, []);
+    // Only poll if NOT in settings view
+    if (view !== 'settings') {
+      const interval = setInterval(loadData, 2000); // Poll every 2s
+      return () => clearInterval(interval);
+    }
+  }, [view]);
 
   const handleDraft = async (player) => {
     // Optimistic UI update or just wait for fetch

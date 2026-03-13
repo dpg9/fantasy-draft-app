@@ -7,7 +7,8 @@ const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTe
     const [pickTime, setPickTime] = useState(settings?.timePerPick || 120);
 
     useEffect(() => {
-        if (settings?.timePerPick) {
+        // Only overwrite local input if server value is different than current input
+        if (settings?.timePerPick && settings.timePerPick !== parseInt(pickTime)) {
             setPickTime(settings.timePerPick);
         }
     }, [settings]);
