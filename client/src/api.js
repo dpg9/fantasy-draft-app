@@ -48,6 +48,22 @@ export const deleteTeam = async (id) => {
     return handleResponse(res);
 };
 
+export const shuffleTeams = async () => {
+    const res = await fetch(`${API_URL}/teams/shuffle`, {
+        method: 'POST',
+    });
+    return handleResponse(res);
+};
+
+export const reorderTeams = async (teamIds) => {
+    const res = await fetch(`${API_URL}/teams/reorder`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ teamIds }),
+    });
+    return handleResponse(res);
+};
+
 export const draftPlayer = async (playerId, teamId, round, pickNumber) => {
     const res = await fetch(`${API_URL}/draft`, {
         method: 'POST',

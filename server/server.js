@@ -105,6 +105,31 @@ app.post('/api/teams', (req, res) => {
     res.json(newTeam);
 });
 
+app.put('/api/teams/reorder', (req, res) => {
+    const { teamIds } = req.body;
+    const state = loadData();
+    
+    if (!Array.isArray(teamIds)) {
+        return res.status(400).json({ error: 'teamIds must be an array' });
+    }
+
+    const newTeams = [];
+    teamIds.forEach(id => {
+        const team = state.teams.find(t => t.id === id);
+        if (team) newTeams.push(team);
+    });
+    
+    // Only save if all teams were found (prevents data loss)
+    if (newTeams.length === state.teams.length) {
+        state.teams = newTeams;
+        state.teams.forEach((t, i) => t.draftOrder = i + 1);
+        saveData(state);
+        res.json({ message: 'Teams reordered', teams: state.teams });
+    } else {
+        res.status(400).json({ error: 'Invalid team IDs provided' });
+    }
+});
+
 app.put('/api/teams/:id', (req, res) => {
     const state = loadData();
     const teamIndex = state.teams.findIndex(t => t.id === req.params.id);
@@ -122,6 +147,19 @@ app.delete('/api/teams/:id', (req, res) => {
     state.teams.forEach((t, i) => t.draftOrder = i + 1);
     saveData(state);
     res.json({ message: 'Team deleted' });
+});
+
+app.post('/api/teams/shuffle', (req, res) => {
+    const state = loadData();
+    // Fisher-Yates shuffle
+    for (let i = state.teams.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [state.teams[i], state.teams[j]] = [state.teams[j], state.teams[i]];
+    }
+    // Re-assign draft order
+    state.teams.forEach((t, i) => t.draftOrder = i + 1);
+    saveData(state);
+    res.json({ message: 'Teams shuffled', teams: state.teams });
 });
 
 app.post('/api/undraft', (req, res) => {

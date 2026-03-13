@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
 
-const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTeam, onDeleteTeam, onUpload, onReset }) => {
+const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTeam, onDeleteTeam, onShuffleTeams, onReorderTeams, onUpload, onReset }) => {
     const [newTeamName, setNewTeamName] = useState('');
     const [newOwnerName, setNewOwnerName] = useState('');
     const [newAvatarUrl, setNewAvatarUrl] = useState('');
     const [pickTime, setPickTime] = useState(settings?.timePerPick || 120);
     const [isSaving, setIsSaving] = useState(false);
+    
+    // Local state for drag and drop
+    const [localTeams, setLocalTeams] = useState(teams);
+    
+    useEffect(() => {
+        setLocalTeams(teams);
+    }, [teams]);
 
     useEffect(() => {
         console.log("Settings Prop Changed:", settings?.timePerPick);
@@ -54,13 +61,58 @@ const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTe
         }
     };
 
+    const handleDragStart = (e, index) => {
+        e.dataTransfer.setData('sourceIndex', index);
+        // Delay adding class to leave the drag image normal
+        setTimeout(() => {
+            e.target.classList.add('opacity-50');
+        }, 0);
+    };
+
+    const handleDragEnd = (e) => {
+        e.target.classList.remove('opacity-50');
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.currentTarget.classList.add('bg-blue-50');
+    };
+
+    const handleDragLeave = (e) => {
+        e.currentTarget.classList.remove('bg-blue-50');
+    };
+
+    const handleDrop = (e, destinationIndex) => {
+        e.preventDefault();
+        e.currentTarget.classList.remove('bg-blue-50');
+        
+        const sourceIndex = parseInt(e.dataTransfer.getData('sourceIndex'), 10);
+        if (isNaN(sourceIndex) || sourceIndex === destinationIndex) return;
+
+        const newTeams = Array.from(localTeams);
+        const [movedTeam] = newTeams.splice(sourceIndex, 1);
+        newTeams.splice(destinationIndex, 0, movedTeam);
+        
+        setLocalTeams(newTeams);
+        onReorderTeams(newTeams.map(t => t.id));
+    };
+
     return (
         <div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-2xl font-bold mb-6">Draft Settings</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                    <h3 className="text-lg font-semibold mb-4">Manage Teams</h3>
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold">Manage Teams</h3>
+                        <button 
+                            onClick={onShuffleTeams}
+                            className="bg-purple-600 text-white px-4 py-1 rounded hover:bg-purple-700 text-sm font-bold shadow-sm"
+                            disabled={teams.length < 2}
+                        >
+                            Shuffle Order
+                        </button>
+                    </div>
                     <div className="flex flex-col gap-2 mb-4">
                         <div className="flex gap-2">
                             <input 
@@ -95,10 +147,20 @@ const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTe
                         </div>
                     </div>
 
-                    <div className="space-y-2 max-h-60 overflow-y-auto">
-                        {teams.map((team, index) => (
-                            <div key={team.id} className="flex justify-between items-center bg-gray-50 p-2 rounded border">
-                                <div className="flex items-center gap-3">
+                    <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                        {localTeams.map((team, index) => (
+                            <div 
+                                key={team.id} 
+                                className="flex justify-between items-center bg-gray-50 p-2 rounded border cursor-grab active:cursor-grabbing transition-colors"
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, index)}
+                                onDragEnd={handleDragEnd}
+                                onDragOver={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                                onDrop={(e) => handleDrop(e, index)}
+                            >
+                                <div className="flex items-center gap-3 pointer-events-none">
+                                    <div className="text-gray-400 cursor-grab px-1">⋮</div>
                                     {team.avatar && <img src={team.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />}
                                     <div>
                                         <span className="font-bold">{index + 1}. {team.name}</span>

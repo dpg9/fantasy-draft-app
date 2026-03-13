@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchState, draftPlayer, undraftPlayer, addTeam, deleteTeam, uploadPlayers, resetDraft, updateSettings } from './api';
+import { fetchState, draftPlayer, undraftPlayer, addTeam, deleteTeam, uploadPlayers, resetDraft, updateSettings, shuffleTeams, reorderTeams } from './api';
 import DraftBoard from './components/DraftBoard';
 import PlayerList from './components/PlayerList';
 import TeamSettings from './components/TeamSettings';
@@ -162,6 +162,8 @@ function App() {
                 }}
                 onAddTeam={async (team) => { await addTeam(team); loadData(); }}
                 onDeleteTeam={async (id) => { await deleteTeam(id); loadData(); }}
+                onShuffleTeams={async () => { await shuffleTeams(); loadData(); }}
+                onReorderTeams={async (teamIds) => { await reorderTeams(teamIds); loadData(); }}
                 onUpload={handleUpload}
                 onReset={async () => { await resetDraft(); loadData(); }}
             />
