@@ -193,9 +193,11 @@ app.post('/api/draft', (req, res) => {
 });
 
 app.post('/api/settings', (req, res) => {
+    console.log("POST /api/settings received:", req.body);
     const state = loadData();
     state.settings = { ...state.settings, ...req.body };
     saveData(state);
+    console.log("New settings saved:", state.settings);
     res.json({ message: "Settings updated", settings: state.settings });
 });
 

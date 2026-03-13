@@ -1,8 +1,16 @@
 const API_URL = 'http://localhost:5001/api';
 
+const handleResponse = async (res) => {
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+    }
+    return res.json();
+};
+
 export const fetchState = async () => {
     const res = await fetch(`${API_URL}/state`);
-    return res.json();
+    return handleResponse(res);
 };
 
 export const uploadPlayers = async (file) => {
@@ -12,7 +20,7 @@ export const uploadPlayers = async (file) => {
         method: 'POST',
         body: formData,
     });
-    return res.json();
+    return handleResponse(res);
 };
 
 export const addTeam = async (team) => {
@@ -21,7 +29,7 @@ export const addTeam = async (team) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(team),
     });
-    return res.json();
+    return handleResponse(res);
 };
 
 export const updateTeam = async (id, team) => {
@@ -30,14 +38,14 @@ export const updateTeam = async (id, team) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(team),
     });
-    return res.json();
+    return handleResponse(res);
 };
 
 export const deleteTeam = async (id) => {
     const res = await fetch(`${API_URL}/teams/${id}`, {
         method: 'DELETE',
     });
-    return res.json();
+    return handleResponse(res);
 };
 
 export const draftPlayer = async (playerId, teamId) => {
@@ -46,7 +54,7 @@ export const draftPlayer = async (playerId, teamId) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ playerId, teamId }),
     });
-    return res.json();
+    return handleResponse(res);
 };
 
 export const updateSettings = async (settings) => {
@@ -55,12 +63,12 @@ export const updateSettings = async (settings) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings),
     });
-    return res.json();
+    return handleResponse(res);
 };
 
 export const resetDraft = async () => {
     const res = await fetch(`${API_URL}/reset`, {
         method: 'POST',
     });
-    return res.json();
+    return handleResponse(res);
 };
