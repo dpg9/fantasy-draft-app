@@ -192,6 +192,43 @@ app.post('/api/draft', (req, res) => {
     res.json({ message: 'Pick recorded', pick, nextState: state.currentPick });
 });
 
+app.post('/api/undraft', (req, res) => {
+    const { playerId } = req.body;
+    const state = loadData();
+
+    // Remove the pick
+    const initialPickCount = state.picks.length;
+    state.picks = state.picks.filter(p => p.playerId !== playerId);
+
+    if (state.picks.length === initialPickCount) {
+        return res.status(404).json({ error: 'Pick not found for this player' });
+    }
+
+    // Recalculate Current Pick (always based on total picks made)
+    const totalTeams = state.teams.length;
+    const nextPickIndex = state.picks.length; 
+    const round = Math.floor(nextPickIndex / totalTeams) + 1;
+    const positionInRound = nextPickIndex % totalTeams;
+    
+    let teamIndex = 0;
+    if (totalTeams > 0) {
+        if (round % 2 !== 0) { // Odd round
+            teamIndex = positionInRound;
+        } else { // Even round
+            teamIndex = totalTeams - 1 - positionInRound;
+        }
+    }
+
+    state.currentPick = {
+        round,
+        pickNumber: nextPickIndex + 1,
+        teamIndex
+    };
+
+    saveData(state);
+    res.json({ message: 'Player returned to pool', nextState: state.currentPick });
+});
+
 app.post('/api/settings', (req, res) => {
     console.log("POST /api/settings received:", req.body);
     const state = loadData();

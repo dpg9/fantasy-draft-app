@@ -57,6 +57,15 @@ export const draftPlayer = async (playerId, teamId) => {
     return handleResponse(res);
 };
 
+export const undraftPlayer = async (playerId) => {
+    const res = await fetch(`${API_URL}/undraft`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerId }),
+    });
+    return handleResponse(res);
+};
+
 export const updateSettings = async (settings) => {
     const res = await fetch(`${API_URL}/settings`, {
         method: 'POST',

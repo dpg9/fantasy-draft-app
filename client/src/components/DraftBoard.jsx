@@ -1,16 +1,8 @@
 import React from 'react';
 
-const DraftBoard = ({ teams, picks, players, totalRounds, currentPick }) => {
+const DraftBoard = ({ teams, picks, players, totalRounds, currentPick, onUndraft }) => {
     // Helper to find pick for a specific cell
     const getPick = (round, teamIndex) => {
-        // Snake Draft Logic for pick number
-        // Odd rounds (1, 3...): 0 -> N-1
-        // Even rounds (2, 4...): N-1 -> 0
-        
-        // This is complex to calculate pick number from cell, 
-        // easier to find if a pick exists for this round/team combination.
-        // But our picks store `teamId`.
-        
         const teamId = teams[teamIndex].id;
         const pick = picks.find(p => p.round === round && p.teamId === teamId);
         if (!pick) return null;
@@ -41,7 +33,7 @@ const DraftBoard = ({ teams, picks, players, totalRounds, currentPick }) => {
             <h2 className="text-xl font-bold mb-4">Draft Board</h2>
             <div className="min-w-max">
                 <div className="flex">
-                    <div className="w-16 flex-shrink-0"></div> {/* Row Header Spacer */}
+                    <div className="w-16 flex-shrink-0"></div>
                     {teams.map((team, index) => (
                         <div key={team.id} className="w-40 p-2 text-center font-bold border-b-2 border-gray-200 flex flex-col items-center">
                             {team.avatar && <img src={team.avatar} alt="" className="w-10 h-10 rounded-full mb-1 object-cover border" />}
@@ -65,12 +57,19 @@ const DraftBoard = ({ teams, picks, players, totalRounds, currentPick }) => {
                                 return (
                                     <div 
                                         key={`${round}-${team.id}`} 
-                                        className={`w-40 p-1 h-20 text-xs flex flex-col justify-center items-center border-l border-gray-100 transition-all
+                                        className={`w-40 p-1 h-20 text-xs flex flex-col justify-center items-center border-l border-gray-100 transition-all relative group
                                             ${active ? 'bg-yellow-100 ring-4 ring-yellow-400 z-10 scale-105 shadow-lg' : ''}
                                         `}
                                     >
                                         {player ? (
-                                            <div className={`w-full h-full rounded p-2 flex flex-col justify-center items-center shadow-sm ${getPositionColor(player.position)}`}>
+                                            <div className={`w-full h-full rounded p-2 flex flex-col justify-center items-center shadow-sm relative ${getPositionColor(player.position)}`}>
+                                                <button 
+                                                    onClick={() => onUndraft(player.id)}
+                                                    className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:scale-110 cursor-pointer"
+                                                    title="Drop Player"
+                                                >
+                                                    ×
+                                                </button>
                                                 <div className="font-bold truncate w-full text-center leading-tight">{player.name}</div>
                                                 <div className="text-[10px] opacity-90">{player.position} - {player.team}</div>
                                             </div>

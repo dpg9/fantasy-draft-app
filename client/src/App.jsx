@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchState, draftPlayer, addTeam, deleteTeam, uploadPlayers, resetDraft, updateSettings } from './api';
+import { fetchState, draftPlayer, undraftPlayer, addTeam, deleteTeam, uploadPlayers, resetDraft, updateSettings } from './api';
 import DraftBoard from './components/DraftBoard';
 import PlayerList from './components/PlayerList';
 import TeamSettings from './components/TeamSettings';
@@ -53,6 +53,18 @@ function App() {
       }
     } catch (err) {
       console.error("Draft failed", err);
+    }
+  };
+
+  const handleUndraft = async (playerId) => {
+    if (!confirm("Remove this player and move the draft back?")) return;
+    try {
+      await undraftPlayer(playerId);
+      setLastPickTime(Date.now());
+      setIsPaused(true); // Pause after correction
+      loadData();
+    } catch (err) {
+      console.error("Undraft failed", err);
     }
   };
 
@@ -150,6 +162,7 @@ function App() {
                         players={data.players}
                         totalRounds={data.settings.totalRounds}
                         currentPick={data.currentPick}
+                        onUndraft={handleUndraft}
                     />
                 </div>
                 <div className="w-96 flex-shrink-0">
