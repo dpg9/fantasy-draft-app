@@ -5,16 +5,33 @@ const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTe
     const [newOwnerName, setNewOwnerName] = useState('');
     const [newAvatarUrl, setNewAvatarUrl] = useState('');
     const [pickTime, setPickTime] = useState(settings?.timePerPick || 120);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        // Only overwrite local input if server value is different than current input
+        console.log("Settings Prop Changed:", settings?.timePerPick);
         if (settings?.timePerPick && settings.timePerPick !== parseInt(pickTime)) {
             setPickTime(settings.timePerPick);
         }
     }, [settings]);
 
-    const handleUpdateSettings = () => {
-        onUpdateSettings({ timePerPick: parseInt(pickTime) });
+    const handleUpdateSettings = async () => {
+        console.log("Handle Update Settings Clicked. Value:", pickTime);
+        const newTime = parseInt(pickTime);
+        if (isNaN(newTime) || newTime <= 0) {
+            alert("Please enter a valid number of seconds.");
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            await onUpdateSettings({ timePerPick: newTime });
+            console.log("Update Settings Callback Finished");
+        } catch (err) {
+            console.error("Failed to update settings:", err);
+            alert("Error saving settings.");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleAdd = () => {
@@ -112,13 +129,15 @@ const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTe
                                     className="border p-1 rounded w-20"
                                     value={pickTime}
                                     onChange={(e) => setPickTime(e.target.value)}
+                                    min="1"
                                 />
                             </div>
                             <button 
                                 onClick={handleUpdateSettings}
-                                className="bg-slate-600 text-white px-3 py-1 rounded text-sm hover:bg-slate-700"
+                                disabled={isSaving}
+                                className={`${isSaving ? 'bg-gray-400' : 'bg-slate-600 hover:bg-slate-700'} text-white px-3 py-1 rounded text-sm transition-colors`}
                             >
-                                Save Settings
+                                {isSaving ? 'Saving...' : 'Save Settings'}
                             </button>
                         </div>
                     </div>
