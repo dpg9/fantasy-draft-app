@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { soundService } from '../SoundService';
 
 const Timer = ({ initialTime, onTimeUp, resetTrigger }) => {
     const [timeLeft, setTimeLeft] = useState(initialTime);
@@ -13,10 +14,17 @@ const Timer = ({ initialTime, onTimeUp, resetTrigger }) => {
         let interval = null;
         if (isActive && timeLeft > 0) {
             interval = setInterval(() => {
-                setTimeLeft(timeLeft - 1);
+                const newTime = timeLeft - 1;
+                setTimeLeft(newTime);
+                
+                // Play warning sound every second under 10 seconds
+                if (newTime < 10 && newTime >= 0) {
+                    soundService.playWarning();
+                }
             }, 1000);
-        } else if (timeLeft === 0) {
+        } else if (timeLeft === 0 && isActive) {
             setIsActive(false);
+            soundService.playBuzzer();
             if (onTimeUp) onTimeUp();
         }
         return () => clearInterval(interval);

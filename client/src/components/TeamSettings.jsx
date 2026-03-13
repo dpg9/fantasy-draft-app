@@ -3,12 +3,18 @@ import React, { useState } from 'react';
 const TeamSettings = ({ teams, onAddTeam, onUpdateTeam, onDeleteTeam, onUpload, onReset }) => {
     const [newTeamName, setNewTeamName] = useState('');
     const [newOwnerName, setNewOwnerName] = useState('');
+    const [newAvatarUrl, setNewAvatarUrl] = useState('');
 
     const handleAdd = () => {
         if (newTeamName && newOwnerName) {
-            onAddTeam({ name: newTeamName, owner: newOwnerName });
+            onAddTeam({ 
+                name: newTeamName, 
+                owner: newOwnerName, 
+                avatar: newAvatarUrl 
+            });
             setNewTeamName('');
             setNewOwnerName('');
+            setNewAvatarUrl('');
         }
     };
 
@@ -26,39 +32,53 @@ const TeamSettings = ({ teams, onAddTeam, onUpdateTeam, onDeleteTeam, onUpload, 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                     <h3 className="text-lg font-semibold mb-4">Manage Teams</h3>
-                    <div className="flex gap-2 mb-4">
-                        <input 
-                            type="text" 
-                            placeholder="Team Name" 
-                            className="border p-2 rounded flex-grow"
-                            value={newTeamName}
-                            onChange={(e) => setNewTeamName(e.target.value)}
-                        />
-                        <input 
-                            type="text" 
-                            placeholder="Owner Name" 
-                            className="border p-2 rounded flex-grow"
-                            value={newOwnerName}
-                            onChange={(e) => setNewOwnerName(e.target.value)}
-                        />
-                        <button 
-                            onClick={handleAdd}
-                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                        >
-                            Add
-                        </button>
+                    <div className="flex flex-col gap-2 mb-4">
+                        <div className="flex gap-2">
+                            <input 
+                                type="text" 
+                                placeholder="Team Name" 
+                                className="border p-2 rounded flex-grow"
+                                value={newTeamName}
+                                onChange={(e) => setNewTeamName(e.target.value)}
+                            />
+                            <input 
+                                type="text" 
+                                placeholder="Owner Name" 
+                                className="border p-2 rounded flex-grow"
+                                value={newOwnerName}
+                                onChange={(e) => setNewOwnerName(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex gap-2">
+                            <input 
+                                type="text" 
+                                placeholder="Avatar Image URL (Optional)" 
+                                className="border p-2 rounded flex-grow"
+                                value={newAvatarUrl}
+                                onChange={(e) => setNewAvatarUrl(e.target.value)}
+                            />
+                            <button 
+                                onClick={handleAdd}
+                                className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-bold"
+                            >
+                                Add Team
+                            </button>
+                        </div>
                     </div>
 
                     <div className="space-y-2 max-h-60 overflow-y-auto">
                         {teams.map((team, index) => (
-                            <div key={team.id} className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                                <div>
-                                    <span className="font-bold">{index + 1}. {team.name}</span>
-                                    <span className="text-gray-500 ml-2">({team.owner})</span>
+                            <div key={team.id} className="flex justify-between items-center bg-gray-50 p-2 rounded border">
+                                <div className="flex items-center gap-3">
+                                    {team.avatar && <img src={team.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />}
+                                    <div>
+                                        <span className="font-bold">{index + 1}. {team.name}</span>
+                                        <span className="text-gray-500 ml-2 text-sm">({team.owner})</span>
+                                    </div>
                                 </div>
                                 <button 
                                     onClick={() => onDeleteTeam(team.id)}
-                                    className="text-red-500 hover:text-red-700"
+                                    className="text-red-500 hover:text-red-700 px-2"
                                 >
                                     Delete
                                 </button>

@@ -4,6 +4,7 @@ import DraftBoard from './components/DraftBoard';
 import PlayerList from './components/PlayerList';
 import TeamSettings from './components/TeamSettings';
 import Timer from './components/Timer';
+import { soundService } from './SoundService';
 
 function App() {
   const [data, setData] = useState({
@@ -41,7 +42,7 @@ function App() {
       if (res.error) {
         alert(res.error);
       } else {
-        // Play sound here
+        soundService.playPick();
         setLastPickTime(Date.now());
         loadData();
       }
