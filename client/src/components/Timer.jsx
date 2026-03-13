@@ -6,21 +6,29 @@ const Timer = ({ initialTime, onTimeUp, resetTrigger, isPaused, onTogglePause, o
     const [isActive, setIsActive] = useState(!isPaused);
     const timerRef = useRef(null);
 
-    // Sync timeLeft when initialTime changes or a reset is triggered
+    // EFFECT 1: Reset the timer ONLY when a new pick happens or settings change
     useEffect(() => {
-        console.log(`Timer Sync: initialTime=${initialTime}, isPaused=${isPaused}`);
+        console.log(`Timer Reset Triggered: initialTime=${initialTime}`);
         setTimeLeft(initialTime);
-        setIsActive(!isPaused);
-    }, [resetTrigger, initialTime, isPaused]);
+    }, [resetTrigger, initialTime]);
 
+    // EFFECT 2: Sync the running state with the pause prop
+    useEffect(() => {
+        setIsActive(!isPaused);
+    }, [isPaused]);
+
+    // EFFECT 3: The actual countdown interval
     useEffect(() => {
         if (isActive && timeLeft > 0) {
             timerRef.current = setInterval(() => {
                 setTimeLeft((prev) => {
                     const next = prev - 1;
+                    
+                    // Audio warnings
                     if (next < 10 && next >= 0) {
                         soundService.playWarning();
                     }
+                    
                     if (next <= 0) {
                         clearInterval(timerRef.current);
                         setIsActive(false);
@@ -35,7 +43,7 @@ const Timer = ({ initialTime, onTimeUp, resetTrigger, isPaused, onTogglePause, o
             clearInterval(timerRef.current);
         }
         return () => clearInterval(timerRef.current);
-    }, [isActive, onTimeUp]); // Only depend on isActive to avoid double intervals
+    }, [isActive, onTimeUp]);
 
     const formatTime = (seconds) => {
         const m = Math.floor(seconds / 60);
@@ -56,13 +64,13 @@ const Timer = ({ initialTime, onTimeUp, resetTrigger, isPaused, onTogglePause, o
             <div className="flex gap-2">
                 <button 
                     onClick={onTogglePause}
-                    className={`${isPaused ? 'bg-green-600 hover:bg-green-700' : 'bg-yellow-600 hover:bg-yellow-700'} text-white text-xs px-3 py-1 rounded uppercase font-black transition-colors`}
+                    className={`${isPaused ? 'bg-green-600 hover:bg-green-700' : 'bg-yellow-600 hover:bg-yellow-700'} text-white text-xs px-3 py-1 rounded uppercase font-black transition-colors min-w-[60px]`}
                 >
                     {isPaused ? 'Start' : 'Stop'}
                 </button>
                 <button 
                     onClick={handleReset}
-                    className="bg-gray-500 hover:bg-gray-600 text-white text-xs px-3 py-1 rounded uppercase font-black transition-colors"
+                    className="bg-gray-500 hover:bg-gray-600 text-white text-xs px-3 py-1 rounded uppercase font-black transition-colors min-w-[60px]"
                 >
                     Reset
                 </button>
