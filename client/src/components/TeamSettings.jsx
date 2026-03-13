@@ -28,7 +28,7 @@ const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTe
             console.log("Update Settings Callback Finished");
         } catch (err) {
             console.error("Failed to update settings:", err);
-            alert("Error saving settings.");
+            alert(`Error saving settings: ${err.message}`);
         } finally {
             setIsSaving(false);
         }

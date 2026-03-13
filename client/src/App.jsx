@@ -16,7 +16,7 @@ function App() {
   });
   const [view, setView] = useState('board'); // 'board' or 'settings'
   const [lastPickTime, setLastPickTime] = useState(Date.now());
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused, setIsPaused] = useState(true); // Default to paused!
 
   const loadData = async () => {
     try {
