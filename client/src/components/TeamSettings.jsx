@@ -5,6 +5,9 @@ const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTe
     const [newOwnerName, setNewOwnerName] = useState('');
     const [newAvatarUrl, setNewAvatarUrl] = useState('');
     const [pickTime, setPickTime] = useState(settings?.timePerPick || 120);
+    const [rosterPositions, setRosterPositions] = useState(settings?.rosterPositions || {
+        QB: 1, RB: 2, WR: 2, TE: 1, FLEX: 1, K: 1, DEF: 1, BENCH: 6
+    });
     const [isSaving, setIsSaving] = useState(false);
     
     // Local state for drag and drop
@@ -19,6 +22,9 @@ const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTe
         if (settings?.timePerPick && settings.timePerPick !== parseInt(pickTime)) {
             setPickTime(settings.timePerPick);
         }
+        if (settings?.rosterPositions) {
+            setRosterPositions(settings.rosterPositions);
+        }
     }, [settings]);
 
     const handleUpdateSettings = async () => {
@@ -31,7 +37,10 @@ const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTe
 
         setIsSaving(true);
         try {
-            await onUpdateSettings({ timePerPick: newTime });
+            await onUpdateSettings({ 
+                timePerPick: newTime,
+                rosterPositions: rosterPositions
+            });
             console.log("Update Settings Callback Finished");
         } catch (err) {
             console.error("Failed to update settings:", err);
@@ -114,7 +123,7 @@ const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTe
                         </button>
                     </div>
                     <div className="flex flex-col gap-2 mb-4">
-                        <div className="flex gap-2">
+                        <div className="flex flex-col md:flex-row gap-2">
                             <input 
                                 type="text" 
                                 placeholder="Team Name" 
@@ -130,7 +139,7 @@ const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTe
                                 onChange={(e) => setNewOwnerName(e.target.value)}
                             />
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col md:flex-row gap-2">
                             <input 
                                 type="text" 
                                 placeholder="Avatar Image URL (Optional)" 
@@ -140,7 +149,7 @@ const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTe
                             />
                             <button 
                                 onClick={handleAdd}
-                                className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-bold"
+                                className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-bold w-full md:w-auto"
                             >
                                 Add Team
                             </button>
@@ -183,9 +192,9 @@ const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTe
 
                     <div className="mb-6 p-4 bg-gray-50 rounded border">
                         <h4 className="font-bold mb-2">Draft Settings</h4>
-                        <div className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-4">
                             <div className="flex items-center gap-2">
-                                <label className="text-sm">Time Per Pick (sec):</label>
+                                <label className="text-sm font-medium w-32">Time Per Pick (sec):</label>
                                 <input 
                                     type="number" 
                                     className="border p-1 rounded w-20"
@@ -194,10 +203,33 @@ const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTe
                                     min="1"
                                 />
                             </div>
+                            
+                            <div className="border-t pt-3">
+                                <label className="text-sm font-medium block mb-2">Roster Position Limits:</label>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                    {['QB', 'RB', 'WR', 'TE', 'FLEX', 'K', 'DEF', 'BENCH'].map(pos => (
+                                        <div key={pos} className="flex items-center justify-between bg-white p-1 px-2 rounded border text-sm">
+                                            <span className="font-bold">{pos}</span>
+                                            <input 
+                                                type="number"
+                                                className="w-12 border rounded px-1 text-center"
+                                                value={rosterPositions[pos]}
+                                                min="0"
+                                                max="10"
+                                                onChange={(e) => setRosterPositions({
+                                                    ...rosterPositions,
+                                                    [pos]: parseInt(e.target.value) || 0
+                                                })}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
                             <button 
                                 onClick={handleUpdateSettings}
                                 disabled={isSaving}
-                                className={`${isSaving ? 'bg-gray-400' : 'bg-slate-600 hover:bg-slate-700'} text-white px-3 py-1 rounded text-sm transition-colors`}
+                                className={`${isSaving ? 'bg-gray-400' : 'bg-slate-600 hover:bg-slate-700'} text-white px-3 py-2 rounded text-sm transition-colors mt-2 font-bold shadow-sm`}
                             >
                                 {isSaving ? 'Saving...' : 'Save Settings'}
                             </button>

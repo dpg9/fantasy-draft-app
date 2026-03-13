@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 
-const PlayerList = ({ players, onDraft, currentTeam, isManual }) => {
+const PlayerList = ({ players, onDraft, currentTeam, isManual, isDraftComplete }) => {
     const [search, setSearch] = useState('');
     const [positionFilter, setPositionFilter] = useState('ALL');
 
@@ -15,7 +15,7 @@ const PlayerList = ({ players, onDraft, currentTeam, isManual }) => {
     }, [players, search, positionFilter]);
 
     return (
-        <div className="bg-white shadow rounded-lg p-4 h-full flex flex-col">
+        <div className="p-4 h-full flex flex-col min-h-0">
             <h2 className="text-xl font-bold mb-4">Available Players</h2>
             
             <div className="flex gap-2 mb-4">
@@ -37,9 +37,9 @@ const PlayerList = ({ players, onDraft, currentTeam, isManual }) => {
                 </select>
             </div>
 
-            <div className="overflow-y-auto flex-grow">
+            <div className="overflow-y-auto flex-grow relative">
                 <table className="w-full text-left">
-                    <thead className="bg-gray-100 sticky top-0">
+                    <thead className="bg-gray-100 sticky top-0 z-10 shadow-sm">
                         <tr>
                             <th className="p-2">Rank</th>
                             <th className="p-2">Name</th>
@@ -58,8 +58,8 @@ const PlayerList = ({ players, onDraft, currentTeam, isManual }) => {
                                 <td className="p-2">
                                     <button 
                                         onClick={() => onDraft(player)}
-                                        className={`${isManual ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'} text-white px-3 py-1 rounded text-sm`}
-                                        disabled={!currentTeam}
+                                        className={`${isManual ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'} text-white px-3 py-1 rounded text-sm disabled:bg-gray-300 disabled:cursor-not-allowed`}
+                                        disabled={(!currentTeam) || (!isManual && isDraftComplete)}
                                     >
                                         {isManual ? 'Insert' : 'Draft'}
                                     </button>

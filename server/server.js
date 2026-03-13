@@ -33,7 +33,17 @@ const defaultState = {
     settings: {
         totalRounds: 15,
         timePerPick: 120, // seconds
-        isSnakeDraft: true
+        isSnakeDraft: true,
+        rosterPositions: {
+            QB: 1,
+            RB: 2,
+            WR: 2,
+            TE: 1,
+            FLEX: 1,
+            K: 1,
+            DEF: 1,
+            BENCH: 6
+        }
     }
 };
 
@@ -230,6 +240,16 @@ app.post('/api/settings', (req, res) => {
     console.log("POST /api/settings received:", req.body);
     const state = loadData();
     state.settings = { ...state.settings, ...req.body };
+    
+    // Automatically recalculate totalRounds based on roster limits
+    if (state.settings.rosterPositions) {
+        let total = 0;
+        for (const count of Object.values(state.settings.rosterPositions)) {
+            total += parseInt(count) || 0;
+        }
+        state.settings.totalRounds = total > 0 ? total : 15;
+    }
+
     saveData(state);
     console.log("New settings saved:", state.settings);
     res.json({ message: "Settings updated", settings: state.settings });

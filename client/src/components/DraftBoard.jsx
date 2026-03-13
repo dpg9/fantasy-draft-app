@@ -29,13 +29,13 @@ const DraftBoard = ({ teams, picks, players, totalRounds, currentPick, onUndraft
     };
 
     return (
-        <div className="overflow-x-auto bg-white shadow rounded-lg p-4">
-            <h2 className="text-xl font-bold mb-4">Draft Board</h2>
-            <div className="min-w-max">
-                <div className="flex">
-                    <div className="w-16 flex-shrink-0"></div>
+        <div className="p-4 h-full">
+            <h2 className="text-xl font-bold mb-4 sticky left-0">Draft Board</h2>
+            <div className="min-w-max relative">
+                <div className="flex sticky top-0 z-20 bg-white border-b-2 border-gray-200">
+                    <div className="w-16 flex-shrink-0 bg-white"></div>
                     {teams.map((team, index) => (
-                        <div key={team.id} className="w-40 p-2 text-center font-bold border-b-2 border-gray-200 flex flex-col items-center">
+                        <div key={team.id} className="w-40 p-2 text-center font-bold flex flex-col items-center bg-white">
                             {team.avatar && <img src={team.avatar} alt="" className="w-10 h-10 rounded-full mb-1 object-cover border" />}
                             <div className="text-sm truncate w-full">{team.name}</div>
                             <div className="text-xs text-gray-500">{team.owner}</div>
