@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchState, draftPlayer, addTeam, deleteTeam, uploadPlayers, resetDraft } from './api';
+import { fetchState, draftPlayer, addTeam, deleteTeam, uploadPlayers, resetDraft, updateSettings } from './api';
 import DraftBoard from './components/DraftBoard';
 import PlayerList from './components/PlayerList';
 import TeamSettings from './components/TeamSettings';
@@ -16,6 +16,7 @@ function App() {
   });
   const [view, setView] = useState('board'); // 'board' or 'settings'
   const [lastPickTime, setLastPickTime] = useState(Date.now());
+  const [isPaused, setIsPaused] = useState(false);
 
   const loadData = async () => {
     try {
@@ -86,6 +87,12 @@ function App() {
                         initialTime={data.settings.timePerPick} 
                         onTimeUp={() => console.log('Time Up!')} 
                         resetTrigger={lastPickTime}
+                        isPaused={isPaused}
+                        onTogglePause={() => setIsPaused(!isPaused)}
+                        onReset={() => {
+                          setLastPickTime(Date.now());
+                          setIsPaused(true);
+                        }}
                     />
                 </div>
                 <div className="text-center">
@@ -116,6 +123,8 @@ function App() {
         {view === 'settings' ? (
             <TeamSettings 
                 teams={data.teams}
+                settings={data.settings}
+                onUpdateSettings={async (s) => { await updateSettings(s); loadData(); }}
                 onAddTeam={async (team) => { await addTeam(team); loadData(); }}
                 onDeleteTeam={async (id) => { await deleteTeam(id); loadData(); }}
                 onUpload={handleUpload}

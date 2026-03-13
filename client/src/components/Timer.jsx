@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { soundService } from '../SoundService';
 
-const Timer = ({ initialTime, onTimeUp, resetTrigger }) => {
+const Timer = ({ initialTime, onTimeUp, resetTrigger, isPaused, onTogglePause, onReset }) => {
     const [timeLeft, setTimeLeft] = useState(initialTime);
     const [isActive, setIsActive] = useState(false);
 
     useEffect(() => {
         setTimeLeft(initialTime);
-        setIsActive(true);
+        setIsActive(!isPaused);
     }, [resetTrigger, initialTime]);
+
+    useEffect(() => {
+        setIsActive(!isPaused);
+    }, [isPaused]);
 
     useEffect(() => {
         let interval = null;
@@ -36,9 +40,30 @@ const Timer = ({ initialTime, onTimeUp, resetTrigger }) => {
         return `${m}:${s < 10 ? '0' : ''}${s}`;
     };
 
+    const handleReset = () => {
+        setTimeLeft(initialTime);
+        if (onReset) onReset();
+    };
+
     return (
-        <div className={`text-4xl font-bold font-mono ${timeLeft < 10 ? 'text-red-500 animate-pulse' : 'text-gray-800'}`}>
-            {formatTime(timeLeft)}
+        <div className="flex flex-col items-center gap-2">
+            <div className={`text-4xl font-bold font-mono ${timeLeft < 10 ? 'text-red-500 animate-pulse' : 'text-gray-800'}`}>
+                {formatTime(timeLeft)}
+            </div>
+            <div className="flex gap-2">
+                <button 
+                    onClick={onTogglePause}
+                    className="bg-gray-600 hover:bg-gray-700 text-white text-xs px-2 py-1 rounded uppercase font-bold"
+                >
+                    {isPaused ? 'Start' : 'Stop'}
+                </button>
+                <button 
+                    onClick={handleReset}
+                    className="bg-gray-400 hover:bg-gray-500 text-white text-xs px-2 py-1 rounded uppercase font-bold"
+                >
+                    Reset
+                </button>
+            </div>
         </div>
     );
 };

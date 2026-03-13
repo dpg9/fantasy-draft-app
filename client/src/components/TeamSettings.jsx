@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 
-const TeamSettings = ({ teams, onAddTeam, onUpdateTeam, onDeleteTeam, onUpload, onReset }) => {
+const TeamSettings = ({ teams, settings, onUpdateSettings, onAddTeam, onUpdateTeam, onDeleteTeam, onUpload, onReset }) => {
     const [newTeamName, setNewTeamName] = useState('');
     const [newOwnerName, setNewOwnerName] = useState('');
     const [newAvatarUrl, setNewAvatarUrl] = useState('');
+    const [pickTime, setPickTime] = useState(settings?.timePerPick || 120);
+
+    const handleUpdateSettings = () => {
+        onUpdateSettings({ timePerPick: parseInt(pickTime) });
+    };
 
     const handleAdd = () => {
         if (newTeamName && newOwnerName) {
@@ -89,6 +94,28 @@ const TeamSettings = ({ teams, onAddTeam, onUpdateTeam, onDeleteTeam, onUpload, 
 
                 <div>
                     <h3 className="text-lg font-semibold mb-4">Data Management</h3>
+
+                    <div className="mb-6 p-4 bg-gray-50 rounded border">
+                        <h4 className="font-bold mb-2">Draft Settings</h4>
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-center gap-2">
+                                <label className="text-sm">Time Per Pick (sec):</label>
+                                <input 
+                                    type="number" 
+                                    className="border p-1 rounded w-20"
+                                    value={pickTime}
+                                    onChange={(e) => setPickTime(e.target.value)}
+                                />
+                            </div>
+                            <button 
+                                onClick={handleUpdateSettings}
+                                className="bg-slate-600 text-white px-3 py-1 rounded text-sm hover:bg-slate-700"
+                            >
+                                Save Settings
+                            </button>
+                        </div>
+                    </div>
+
                     <div className="mb-6">
                         <label className="block mb-2 font-medium">Upload Players CSV</label>
                         <input 

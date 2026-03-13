@@ -192,6 +192,13 @@ app.post('/api/draft', (req, res) => {
     res.json({ message: 'Pick recorded', pick, nextState: state.currentPick });
 });
 
+app.post('/api/settings', (req, res) => {
+    const state = loadData();
+    state.settings = { ...state.settings, ...req.body };
+    saveData(state);
+    res.json({ message: "Settings updated", settings: state.settings });
+});
+
 app.post('/api/reset', (req, res) => {
     saveData(defaultState);
     res.json({ message: "Draft state reset", state: defaultState });

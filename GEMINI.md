@@ -73,5 +73,5 @@ npm run dev
 1. **Undo Last Pick**: Implement functionality to rollback the draft state.
 2. **Draft Order Randomizer**: Add a button to shuffle team order before starting.
 3. **Proxmox Deployment**: Create Dockerfile and deployment guide for hosting on Proxmox.
-4. **Validation & Commissioner Tools**: Add backend validation and a "Pause/Reset Timer" button.
-5. **Mobile View**: Optimize the Draft Board for tablets/phones.
+4. **Mobile View**: Optimize the Draft Board for tablets/phones.
+5. **Enhanced Commissioner Tools**: Expand beyond current timer controls.
