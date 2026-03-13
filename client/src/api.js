@@ -48,11 +48,11 @@ export const deleteTeam = async (id) => {
     return handleResponse(res);
 };
 
-export const draftPlayer = async (playerId, teamId) => {
+export const draftPlayer = async (playerId, teamId, round, pickNumber) => {
     const res = await fetch(`${API_URL}/draft`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ playerId, teamId }),
+        body: JSON.stringify({ playerId, teamId, round, pickNumber }),
     });
     return handleResponse(res);
 };

@@ -17,6 +17,7 @@ function App() {
   const [view, setView] = useState('board'); // 'board' or 'settings'
   const [lastPickTime, setLastPickTime] = useState(Date.now());
   const [isPaused, setIsPaused] = useState(true); // Default to paused!
+  const [manualPickTarget, setManualPickTarget] = useState(null);
 
   const loadData = async () => {
     try {
@@ -37,18 +38,29 @@ function App() {
   }, [view]);
 
   const handleDraft = async (player) => {
-    // Optimistic UI update or just wait for fetch
-    const currentTeam = data.teams[data.currentPick.teamIndex];
-    if (!currentTeam) return;
+    let targetTeamId, targetRound, targetPickNumber;
+    
+    if (manualPickTarget) {
+      targetTeamId = manualPickTarget.teamId;
+      targetRound = manualPickTarget.round;
+      targetPickNumber = (manualPickTarget.round - 1) * data.teams.length + manualPickTarget.teamIndex + 1;
+    } else {
+      const currentTeam = data.teams[data.currentPick.teamIndex];
+      if (!currentTeam) return;
+      targetTeamId = currentTeam.id;
+    }
 
     try {
-      const res = await draftPlayer(player.id, currentTeam.id);
+      const res = await draftPlayer(player.id, targetTeamId, targetRound, targetPickNumber);
       if (res.error) {
         alert(res.error);
       } else {
         soundService.playPick();
-        setLastPickTime(Date.now());
-        setIsPaused(false); // Auto-start next pick timer
+        if (!manualPickTarget) {
+          setLastPickTime(Date.now());
+          setIsPaused(false); // Auto-start next pick timer
+        }
+        setManualPickTarget(null); // Clear manual selection
         loadData();
       }
     } catch (err) {
@@ -163,13 +175,16 @@ function App() {
                         totalRounds={data.settings.totalRounds}
                         currentPick={data.currentPick}
                         onUndraft={handleUndraft}
+                        manualPickTarget={manualPickTarget}
+                        onSelectTarget={setManualPickTarget}
                     />
                 </div>
                 <div className="w-96 flex-shrink-0">
                     <PlayerList 
                         players={availablePlayers}
                         onDraft={handleDraft}
-                        currentTeam={currentTeam}
+                        currentTeam={manualPickTarget ? data.teams.find(t => t.id === manualPickTarget.teamId) : currentTeam}
+                        isManual={!!manualPickTarget}
                     />
                 </div>
             </div>

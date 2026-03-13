@@ -124,8 +124,20 @@ app.delete('/api/teams/:id', (req, res) => {
     res.json({ message: 'Team deleted' });
 });
 
+app.post('/api/undraft', (req, res) => {
+    const { playerId } = req.body;
+    const state = loadData();
+
+    // Remove the pick
+    state.picks = state.picks.filter(p => p.playerId !== playerId);
+
+    // We no longer recalculate currentPick automatically here
+    saveData(state);
+    res.json({ message: 'Player returned to pool', state });
+});
+
 app.post('/api/draft', (req, res) => {
-    const { playerId, teamId } = req.body;
+    const { playerId, teamId, round, pickNumber } = req.body;
     const state = loadData();
 
     // Validation
@@ -136,97 +148,44 @@ app.post('/api/draft', (req, res) => {
         return res.status(400).json({ error: 'Player already drafted' });
     }
 
+    // Determine if this is a manual placement or a "standard" next-pick draft
+    const isManual = round !== undefined;
+
     // Record Pick
     const pick = {
-        round: state.currentPick.round,
-        pickNumber: state.currentPick.pickNumber,
+        round: isManual ? round : state.currentPick.round,
+        pickNumber: isManual ? (pickNumber || 0) : state.currentPick.pickNumber,
         teamId,
         playerId,
         timestamp: Date.now()
     };
     state.picks.push(pick);
 
-    // Update Current Pick Logic (Snake Draft)
-    const totalTeams = state.teams.length;
-    let nextPick = state.currentPick.pickNumber + 1;
-    let nextRound = state.currentPick.round;
-    let nextTeamIndex = state.currentPick.teamIndex;
+    // ONLY update currentPick if it was NOT a manual placement
+    if (!isManual) {
+        const totalTeams = state.teams.length;
+        const nextPickIndex = state.picks.length; 
+        const nextRound = Math.floor(nextPickIndex / totalTeams) + 1;
+        const positionInRound = nextPickIndex % totalTeams;
+        
+        let teamIndex = 0;
+        if (totalTeams > 0) {
+            if (nextRound % 2 !== 0) {
+                teamIndex = positionInRound;
+            } else {
+                teamIndex = totalTeams - 1 - positionInRound;
+            }
+        }
 
-    // Logic for Snake Draft:
-    // Odd Rounds: 0 -> N-1
-    // Even Rounds: N-1 -> 0
-    
-    if (nextPick > totalTeams * nextRound) {
-        nextRound++;
+        state.currentPick = {
+            round: nextRound,
+            pickNumber: nextPickIndex + 1,
+            teamIndex
+        };
     }
-
-    // Determine next team index based on round parity
-    // This is a simplified logic, for a real app we need robust index calc
-    // But for now, let's just increment pickNumber and let the frontend calculate who is up
-    // Or do it here:
-    
-    // Snake Logic:
-    // Round 1 (Odd): 0, 1, 2...
-    // Round 2 (Even): 2, 1, 0...
-    
-    // Current total picks made = state.picks.length
-    // Next pick index (0-based) = state.picks.length
-    const nextPickIndex = state.picks.length; 
-    const round = Math.floor(nextPickIndex / totalTeams) + 1;
-    const positionInRound = nextPickIndex % totalTeams;
-    
-    let teamIndex;
-    if (round % 2 !== 0) { // Odd round (1, 3, 5...)
-        teamIndex = positionInRound;
-    } else { // Even round (2, 4, 6...)
-        teamIndex = totalTeams - 1 - positionInRound;
-    }
-
-    state.currentPick = {
-        round,
-        pickNumber: nextPickIndex + 1,
-        teamIndex
-    };
 
     saveData(state);
     res.json({ message: 'Pick recorded', pick, nextState: state.currentPick });
-});
-
-app.post('/api/undraft', (req, res) => {
-    const { playerId } = req.body;
-    const state = loadData();
-
-    // Remove the pick
-    const initialPickCount = state.picks.length;
-    state.picks = state.picks.filter(p => p.playerId !== playerId);
-
-    if (state.picks.length === initialPickCount) {
-        return res.status(404).json({ error: 'Pick not found for this player' });
-    }
-
-    // Recalculate Current Pick (always based on total picks made)
-    const totalTeams = state.teams.length;
-    const nextPickIndex = state.picks.length; 
-    const round = Math.floor(nextPickIndex / totalTeams) + 1;
-    const positionInRound = nextPickIndex % totalTeams;
-    
-    let teamIndex = 0;
-    if (totalTeams > 0) {
-        if (round % 2 !== 0) { // Odd round
-            teamIndex = positionInRound;
-        } else { // Even round
-            teamIndex = totalTeams - 1 - positionInRound;
-        }
-    }
-
-    state.currentPick = {
-        round,
-        pickNumber: nextPickIndex + 1,
-        teamIndex
-    };
-
-    saveData(state);
-    res.json({ message: 'Player returned to pool', nextState: state.currentPick });
 });
 
 app.post('/api/settings', (req, res) => {

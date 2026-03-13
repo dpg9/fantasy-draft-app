@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DraftBoard = ({ teams, picks, players, totalRounds, currentPick, onUndraft }) => {
+const DraftBoard = ({ teams, picks, players, totalRounds, currentPick, onUndraft, manualPickTarget, onSelectTarget }) => {
     // Helper to find pick for a specific cell
     const getPick = (round, teamIndex) => {
         const teamId = teams[teamIndex].id;
@@ -53,19 +53,31 @@ const DraftBoard = ({ teams, picks, players, totalRounds, currentPick, onUndraft
                             {teams.map((team, tIndex) => {
                                 const player = getPick(round, tIndex);
                                 const active = isCurrentPick(round, tIndex);
+                                const isManualTarget = manualPickTarget?.round === round && manualPickTarget?.teamId === team.id;
                                 
                                 return (
                                     <div 
                                         key={`${round}-${team.id}`} 
-                                        className={`w-40 p-1 h-20 text-xs flex flex-col justify-center items-center border-l border-gray-100 transition-all relative group
+                                        className={`w-40 p-1 h-20 text-xs flex flex-col justify-center items-center border-l border-gray-100 transition-all relative group cursor-pointer
                                             ${active ? 'bg-yellow-100 ring-4 ring-yellow-400 z-10 scale-105 shadow-lg' : ''}
+                                            ${isManualTarget ? 'bg-blue-100 ring-4 ring-blue-500 z-20 scale-105 shadow-lg' : ''}
+                                            ${!player && !active && !isManualTarget ? 'hover:bg-gray-50' : ''}
                                         `}
+                                        onClick={() => {
+                                            if (!player && !active) {
+                                                if (isManualTarget) {
+                                                    onSelectTarget(null);
+                                                } else {
+                                                    onSelectTarget({ round, teamId: team.id, teamIndex: tIndex });
+                                                }
+                                            }
+                                        }}
                                     >
                                         {player ? (
-                                            <div className={`w-full h-full rounded p-2 flex flex-col justify-center items-center shadow-sm relative ${getPositionColor(player.position)}`}>
+                                            <div className={`w-full h-full rounded p-2 flex flex-col justify-center items-center shadow-sm relative cursor-default ${getPositionColor(player.position)}`}>
                                                 <button 
-                                                    onClick={() => onUndraft(player.id)}
-                                                    className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:scale-110 cursor-pointer"
+                                                    onClick={(e) => { e.stopPropagation(); onUndraft(player.id); }}
+                                                    className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:scale-110 cursor-pointer z-30"
                                                     title="Drop Player"
                                                 >
                                                     ×
@@ -77,6 +89,11 @@ const DraftBoard = ({ teams, picks, players, totalRounds, currentPick, onUndraft
                                             <div className="text-yellow-600 font-black animate-pulse text-center">
                                                 <div className="text-sm">PICKING</div>
                                                 <div className="text-[10px]">NOW</div>
+                                            </div>
+                                        ) : isManualTarget ? (
+                                            <div className="text-blue-600 font-bold text-center">
+                                                <div className="text-xs">INSERT</div>
+                                                <div className="text-[10px]">HERE</div>
                                             </div>
                                         ) : null}
                                     </div>

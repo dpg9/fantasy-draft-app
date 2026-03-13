@@ -58,7 +58,7 @@ const Timer = ({ initialTime, onTimeUp, resetTrigger, isPaused, onTogglePause, o
 
     return (
         <div className="flex flex-col items-center gap-2">
-            <div className={`text-4xl font-bold font-mono ${timeLeft < 10 && timeLeft > 0 ? 'text-red-500 animate-pulse' : 'text-gray-800'}`}>
+            <div className={`text-4xl font-bold font-mono ${timeLeft < 10 && timeLeft > 0 ? 'text-red-500 animate-pulse' : 'text-gray-100'}`}>
                 {formatTime(timeLeft)}
             </div>
             <div className="flex gap-2">

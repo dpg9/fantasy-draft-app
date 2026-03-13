@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 
-const PlayerList = ({ players, onDraft, currentTeam }) => {
+const PlayerList = ({ players, onDraft, currentTeam, isManual }) => {
     const [search, setSearch] = useState('');
     const [positionFilter, setPositionFilter] = useState('ALL');
 
@@ -58,10 +58,10 @@ const PlayerList = ({ players, onDraft, currentTeam }) => {
                                 <td className="p-2">
                                     <button 
                                         onClick={() => onDraft(player)}
-                                        className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm"
+                                        className={`${isManual ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'} text-white px-3 py-1 rounded text-sm`}
                                         disabled={!currentTeam}
                                     >
-                                        Draft
+                                        {isManual ? 'Insert' : 'Draft'}
                                     </button>
                                 </td>
                             </tr>
