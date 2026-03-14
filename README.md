@@ -21,15 +21,13 @@ A professional, full-stack web application designed for hosting live, "local par
 - **Uptime Safety Net:** Global error handlers prevent the server from crashing during live events.
 - **100% Offline-First:** Runs entirely on your local machine. No internet required for draft day once your player database is loaded.
 
-### 📱 Responsive Design
-- **Cross-Platform:** Optimized for Desktops, Tablets, and Phones.
-- **Sticky UI:** Headers, team names, and search bars stay anchored while you scroll through long drafts.
-
 ---
 
-## 🛠️ Prerequisites
-- **Node.js** (v20+ recommended)
-- **npm**
+## 🛠️ Tech Stack
+- **Frontend:** React 18, Vite, Tailwind CSS v4
+- **Backend:** Node.js, Express 5 (REST API)
+- **Database:** Local JSON Persistence (Flat-file)
+- **Deployment:** Docker, Docker Compose
 
 ---
 
@@ -61,22 +59,19 @@ To populate your draft, go to the **Settings** page and upload a CSV file.
 
 ---
 
-## 🖥️ Running on Windows
-The app is fully compatible with Windows. For the easiest experience, use **Git Bash** to run the `./start-dev.sh` script, or run the server and client in two separate PowerShell/Command Prompt windows.
-
-## 🐳 Docker Deployment
+## 🐳 Docker & Proxmox Deployment
 
 The app is containerized for easy deployment on Proxmox, home servers, or portable usage.
 
-### 1. Build and Run (Standard)
+### 1. Build and Run
 Ensure you have **Docker Desktop** installed, then run:
 ```bash
 docker-compose up --build -d
 ```
 The app will be available at `http://localhost:5001`.
 
-### 2. Data Persistence
-Your draft data is stored in `./server/data/draft-data.json`. This folder is mapped into the Docker container, so your data will persist even if the container is restarted or updated.
+### 2. Proxmox / Home Server Tip
+To keep the app running forever on your server, the `docker-compose.yml` is configured with `restart: always`. This ensures the draft board comes back online automatically even after a server reboot or power flicker.
 
 ### 3. Portable "Offline" Usage
 To create a single file you can take anywhere (via USB stick) and run on a machine without internet:
@@ -91,5 +86,19 @@ To create a single file you can take anywhere (via USB stick) and run on a machi
    docker load < fantasy-draft-app.tar
    docker run -d -p 5001:5001 --name my-draft fantasy-draft-app
    ```
-3. Open `http://localhost:5001` in the browser.
 
+---
+
+## 📁 Project Structure
+```text
+├── client/           # React Frontend (Vite)
+├── server/           # Node.js Express Backend
+│   ├── data/         # Persistent Draft JSON data
+│   └── uploads/      # Temporary CSV storage
+├── examples/         # Sample player rosters (CSV)
+├── Dockerfile        # Multi-stage production build
+└── docker-compose.yml # Service orchestration
+```
+
+## ⚖️ License
+MIT License - Free to use for your personal draft parties!
