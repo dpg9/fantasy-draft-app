@@ -48,6 +48,22 @@ export const deleteTeam = async (id) => {
     return handleResponse(res);
 };
 
+export const bulkAddTeams = async (count) => {
+    const res = await fetch(`${API_URL}/teams/bulk-add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count }),
+    });
+    return handleResponse(res);
+};
+
+export const clearAllTeams = async () => {
+    const res = await fetch(`${API_URL}/teams/clear-all`, {
+        method: 'POST',
+    });
+    return handleResponse(res);
+};
+
 export const shuffleTeams = async () => {
     const res = await fetch(`${API_URL}/teams/shuffle`, {
         method: 'POST',
@@ -93,6 +109,13 @@ export const updateSettings = async (settings) => {
 
 export const resetDraft = async () => {
     const res = await fetch(`${API_URL}/reset`, {
+        method: 'POST',
+    });
+    return handleResponse(res);
+};
+
+export const clearPicks = async () => {
+    const res = await fetch(`${API_URL}/clear-picks`, {
         method: 'POST',
     });
     return handleResponse(res);

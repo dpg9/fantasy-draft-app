@@ -26,7 +26,13 @@ app.use(bodyParser.json());
 
 // Default State
 const defaultState = {
-    teams: [],
+    teams: Array.from({ length: 10 }).map((_, i) => ({
+        id: `team-placeholder-${i + 1}`,
+        name: `Team ${i + 1}`,
+        owner: `Owner ${i + 1}`,
+        avatar: "",
+        draftOrder: i + 1
+    })),
     players: [],
     picks: [], // { round, pickNumber, teamId, playerId }
     currentPick: { round: 1, pickNumber: 1, teamIndex: 0 },
@@ -122,6 +128,32 @@ app.post('/api/teams', (req, res) => {
     state.teams.push(newTeam);
     saveData(state);
     res.json(newTeam);
+});
+
+app.post('/api/teams/bulk-add', (req, res) => {
+    const { count } = req.body;
+    const state = loadData();
+    const startCount = state.teams.length;
+    
+    for (let i = 0; i < count; i++) {
+        const num = startCount + i + 1;
+        state.teams.push({
+            id: `team-${Date.now()}-${i}`,
+            name: `Team ${num}`,
+            owner: `Owner ${num}`,
+            avatar: "",
+            draftOrder: num
+        });
+    }
+    saveData(state);
+    res.json({ message: `${count} teams added`, teams: state.teams });
+});
+
+app.post('/api/teams/clear-all', (req, res) => {
+    const state = loadData();
+    state.teams = [];
+    saveData(state);
+    res.json({ message: "All teams cleared", teams: [] });
 });
 
 app.put('/api/teams/reorder', (req, res) => {
@@ -262,6 +294,14 @@ app.post('/api/settings', (req, res) => {
     saveData(state);
     console.log("New settings saved:", state.settings);
     res.json({ message: "Settings updated", settings: state.settings });
+});
+
+app.post('/api/clear-picks', (req, res) => {
+    const state = loadData();
+    state.picks = [];
+    state.currentPick = { round: 1, pickNumber: 1, teamIndex: 0 };
+    saveData(state);
+    res.json({ message: "Draft picks cleared", state });
 });
 
 app.post('/api/reset', (req, res) => {

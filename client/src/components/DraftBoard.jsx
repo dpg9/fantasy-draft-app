@@ -1,6 +1,19 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 const DraftBoard = ({ teams, picks, players, totalRounds, currentPick, onUndraft, manualPickTarget, onSelectTarget }) => {
+    const activePickRef = useRef(null);
+
+    // Auto-scroll to the active pick when it changes
+    useEffect(() => {
+        if (activePickRef.current) {
+            activePickRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center'
+            });
+        }
+    }, [currentPick]);
+
     // Helper to find pick for a specific cell
     const getPick = (round, teamIndex) => {
         const teamId = teams[teamIndex].id;
@@ -82,6 +95,7 @@ const DraftBoard = ({ teams, picks, players, totalRounds, currentPick, onUndraft
                                 return (
                                     <div 
                                         key={`${round}-${team.id}`} 
+                                        ref={active ? activePickRef : null}
                                         className={`w-40 p-1 h-20 text-xs flex flex-col justify-center items-center border-l border-gray-100 transition-all relative group cursor-pointer
                                             ${active ? 'bg-yellow-100 ring-4 ring-yellow-400 z-10 scale-105 shadow-lg' : ''}
                                             ${isOnClock && !active ? 'bg-yellow-50/50' : ''}

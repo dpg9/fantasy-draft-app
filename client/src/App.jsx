@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchState, draftPlayer, undraftPlayer, addTeam, updateTeam, deleteTeam, uploadPlayers, resetDraft, updateSettings, shuffleTeams, reorderTeams } from './api';
+import { fetchState, draftPlayer, undraftPlayer, addTeam, updateTeam, deleteTeam, bulkAddTeams, clearAllTeams, uploadPlayers, resetDraft, clearPicks, updateSettings, shuffleTeams, reorderTeams } from './api';
 import DraftBoard from './components/DraftBoard';
 import PlayerList from './components/PlayerList';
 import TeamSettings from './components/TeamSettings';
@@ -133,9 +133,15 @@ function App() {
                                 }}
                             />
                         </div>
-                        <div className="text-center">
-                            <div className="text-xs md:text-sm text-gray-400">ROUND</div>
-                            <div className="text-lg md:text-2xl font-bold">{data.currentPick.round}</div>
+                        <div className="flex gap-4 md:gap-6">
+                            <div className="text-center border-r border-slate-700 pr-4 md:pr-6">
+                                <div className="text-xs md:text-sm text-gray-400 font-bold uppercase tracking-tighter">Round</div>
+                                <div className="text-lg md:text-2xl font-black">{data.currentPick.round}</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-xs md:text-sm text-gray-400 font-bold uppercase tracking-tighter">Pick</div>
+                                <div className="text-lg md:text-2xl font-black">{data.currentPick.pickNumber}</div>
+                            </div>
                         </div>
                     </>
                 )}
@@ -170,6 +176,7 @@ function App() {
             <TeamSettings 
                 teams={data.teams}
                 settings={data.settings}
+                picks={data.picks}
                 onUpdateSettings={async (s) => { 
                   await updateSettings(s); 
                   const state = await fetchState(); // Get fresh state
@@ -181,9 +188,12 @@ function App() {
                 onAddTeam={async (team) => { await addTeam(team); loadData(); }}
                 onUpdateTeam={async (id, team) => { await updateTeam(id, team); loadData(); }}
                 onDeleteTeam={async (id) => { await deleteTeam(id); loadData(); }}
+                onBulkAddTeams={async (count) => { await bulkAddTeams(count); loadData(); }}
+                onClearAllTeams={async () => { await clearAllTeams(); loadData(); }}
                 onShuffleTeams={async () => { await shuffleTeams(); loadData(); }}
                 onReorderTeams={async (teamIds) => { await reorderTeams(teamIds); loadData(); }}
                 onUpload={handleUpload}
+                onClearPicks={async () => { await clearPicks(); loadData(); }}
                 onReset={async () => { await resetDraft(); loadData(); }}
             />
         ) : view === 'rosters' ? (
