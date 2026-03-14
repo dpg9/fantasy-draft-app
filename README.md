@@ -65,4 +65,31 @@ To populate your draft, go to the **Settings** page and upload a CSV file.
 The app is fully compatible with Windows. For the easiest experience, use **Git Bash** to run the `./start-dev.sh` script, or run the server and client in two separate PowerShell/Command Prompt windows.
 
 ## 🐳 Docker Deployment
-*Detailed Dockerfile and Docker-Compose instructions coming soon for Proxmox and Home Server hosting.*
+
+The app is containerized for easy deployment on Proxmox, home servers, or portable usage.
+
+### 1. Build and Run (Standard)
+Ensure you have **Docker Desktop** installed, then run:
+```bash
+docker-compose up --build -d
+```
+The app will be available at `http://localhost:5001`.
+
+### 2. Data Persistence
+Your draft data is stored in `./server/data/draft-data.json`. This folder is mapped into the Docker container, so your data will persist even if the container is restarted or updated.
+
+### 3. Portable "Offline" Usage
+To create a single file you can take anywhere (via USB stick) and run on a machine without internet:
+
+1. **Create the image file:**
+   ```bash
+   docker build -t fantasy-draft-app .
+   docker save fantasy-draft-app > fantasy-draft-app.tar
+   ```
+2. **On the target machine (offline):**
+   ```bash
+   docker load < fantasy-draft-app.tar
+   docker run -d -p 5001:5001 --name my-draft fantasy-draft-app
+   ```
+3. Open `http://localhost:5001` in the browser.
+

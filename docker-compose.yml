@@ -1,0 +1,10 @@
+services:
+  fantasy-draft:
+    build: .
+    container_name: fantasy-draft-app
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./server/data:/app/server/data
+      - ./server/uploads:/app/server/uploads
+    restart: always

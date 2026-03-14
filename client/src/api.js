@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5001/api';
+const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:5001/api';
 
 const handleResponse = async (res) => {
     if (!res.ok) {

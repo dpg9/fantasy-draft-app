@@ -355,6 +355,23 @@ app.post('/api/reset', (req, res) => {
     res.json({ message: "Draft state reset", state: defaultState });
 });
 
+// Serve Frontend Static Files
+// In production, the built React app is placed in the 'public' folder
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Catch-all route to serve the React index.html for any non-API requests
+// This enables client-side routing
+app.get('*', (req, res) => {
+    // If request is not for an API route, serve the frontend
+    if (!req.url.startsWith('/api')) {
+        const indexPath = path.join(__dirname, 'public', 'index.html');
+        if (fs.existsSync(indexPath)) {
+            return res.sendFile(indexPath);
+        }
+    }
+    res.status(404).json({ error: 'Not Found' });
+});
+
 // Global Error Handlers (The "Uptime Safety Net")
 // This prevents the server from crashing if an unexpected logic error occurs
 process.on('uncaughtException', (err) => {
