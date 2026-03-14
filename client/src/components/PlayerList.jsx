@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 
-const PlayerList = ({ players, onDraft, currentTeam, isManual, isDraftComplete }) => {
+const PlayerList = ({ players, picks, onDraft, currentTeam, isManual, isDraftComplete, manualPickTarget }) => {
     const [search, setSearch] = useState('');
     const [positionFilter, setPositionFilter] = useState('ALL');
 
@@ -14,9 +14,26 @@ const PlayerList = ({ players, onDraft, currentTeam, isManual, isDraftComplete }
         }).sort((a, b) => a.rank - b.rank); // Sort by rank
     }, [players, search, positionFilter]);
 
+    // Check if the selected manual slot is already taken
+    const isTargetOccupied = isManual && manualPickTarget && picks.some(p => p.round === manualPickTarget.round && p.teamId === manualPickTarget.teamId);
+
     return (
         <div className="p-4 h-full flex flex-col min-h-0">
-            <h2 className="text-xl font-bold mb-4">Available Players</h2>
+            <div className="flex flex-col gap-2 mb-4">
+                <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-bold">Available Players</h2>
+                    {isManual && manualPickTarget && (
+                        <div className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md transition-colors ${isTargetOccupied ? 'bg-red-600 text-white' : 'bg-blue-600 text-white animate-pulse'}`}>
+                            {isTargetOccupied ? 'Slot Occupied' : `Selected: R${manualPickTarget.round} P${manualPickTarget.pickNumber}`}
+                        </div>
+                    )}
+                </div>
+                {isTargetOccupied && (
+                    <div className="text-[10px] text-red-600 font-bold bg-red-50 p-2 rounded border border-red-100 leading-tight">
+                        ⚠️ This slot already has a player. You must remove them from the draft board first before inserting someone else here.
+                    </div>
+                )}
+            </div>
             
             <div className="flex gap-2 mb-4">
                 <input 
@@ -59,7 +76,7 @@ const PlayerList = ({ players, onDraft, currentTeam, isManual, isDraftComplete }
                                     <button 
                                         onClick={() => onDraft(player)}
                                         className={`${isManual ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'} text-white px-3 py-1 rounded text-sm disabled:bg-gray-300 disabled:cursor-not-allowed`}
-                                        disabled={(!currentTeam) || (!isManual && isDraftComplete)}
+                                        disabled={(!currentTeam) || (isManual && isTargetOccupied) || (!isManual && isDraftComplete)}
                                     >
                                         {isManual ? 'Insert' : 'Draft'}
                                     </button>

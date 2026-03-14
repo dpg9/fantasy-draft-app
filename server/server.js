@@ -213,6 +213,37 @@ app.post('/api/teams/shuffle', (req, res) => {
     res.json({ message: 'Teams shuffled', teams: state.teams });
 });
 
+const getNextAutomatedPick = (state) => {
+    const totalTeams = state.teams.length;
+    if (totalTeams === 0) return { round: 1, pickNumber: 1, teamIndex: 0 };
+
+    const totalPossiblePicks = totalTeams * state.settings.totalRounds;
+
+    // Find the first pick number that doesn't have a record in state.picks
+    for (let pNum = 1; pNum <= totalPossiblePicks; pNum++) {
+        if (!state.picks.some(p => p.pickNumber === pNum)) {
+            // Found the first empty hole. Calculate round and teamIndex for this pick number.
+            const round = Math.ceil(pNum / totalTeams);
+            const positionInRound = (pNum - 1) % totalTeams;
+
+            let teamIndex;
+            const isSnake = state.settings.isSnakeDraft !== false;
+            if (isSnake && round % 2 === 0) {
+                // Even round in snake: reverse order
+                teamIndex = totalTeams - 1 - positionInRound;
+            } else {
+                // Odd round or standard draft: normal order
+                teamIndex = positionInRound;
+            }
+
+            return { round, pickNumber: pNum, teamIndex };
+        }
+    }
+
+    // If all slots are full
+    return { round: state.settings.totalRounds + 1, pickNumber: totalPossiblePicks + 1, teamIndex: 0 };
+};
+
 app.post('/api/undraft', (req, res) => {
     const { playerId } = req.body;
     const state = loadData();
@@ -220,7 +251,9 @@ app.post('/api/undraft', (req, res) => {
     // Remove the pick
     state.picks = state.picks.filter(p => p.playerId !== playerId);
 
-    // We no longer recalculate currentPick automatically here
+    // Recalculate currentPick to fill the hole we just created (if it's earlier than the current pointer)
+    state.currentPick = getNextAutomatedPick(state);
+
     saveData(state);
     res.json({ message: 'Player returned to pool', state });
 });
@@ -231,47 +264,33 @@ app.post('/api/draft', (req, res) => {
 
     // Validation
     if (!playerId || !teamId) return res.status(400).json({ error: 'Missing playerId or teamId' });
-    
+
     // Check if player is already drafted
     if (state.picks.some(p => p.playerId === playerId)) {
         return res.status(400).json({ error: 'Player already drafted' });
     }
 
     // Determine if this is a manual placement or a "standard" next-pick draft
-    const isManual = round !== undefined;
+    const isManual = round !== undefined && pickNumber !== undefined;
+
+    // If manual, check if the specific slot is already occupied
+    if (isManual && state.picks.some(p => p.round === round && p.teamId === teamId)) {
+        return res.status(400).json({ error: 'This draft slot is already occupied' });
+    }
 
     // Record Pick
     const pick = {
         round: isManual ? round : state.currentPick.round,
-        pickNumber: isManual ? (pickNumber || 0) : state.currentPick.pickNumber,
+        pickNumber: isManual ? pickNumber : state.currentPick.pickNumber,
         teamId,
         playerId,
         timestamp: Date.now()
     };
+
     state.picks.push(pick);
 
-    // ONLY update currentPick if it was NOT a manual placement
-    if (!isManual) {
-        const totalTeams = state.teams.length;
-        const nextPickIndex = state.picks.length; 
-        const nextRound = Math.floor(nextPickIndex / totalTeams) + 1;
-        const positionInRound = nextPickIndex % totalTeams;
-        
-        let teamIndex = 0;
-        if (totalTeams > 0) {
-            if (nextRound % 2 !== 0) {
-                teamIndex = positionInRound;
-            } else {
-                teamIndex = totalTeams - 1 - positionInRound;
-            }
-        }
-
-        state.currentPick = {
-            round: nextRound,
-            pickNumber: nextPickIndex + 1,
-            teamIndex
-        };
-    }
+    // Always recalculate currentPick to ensure it points to the earliest "hole" in the draft
+    state.currentPick = getNextAutomatedPick(state);
 
     saveData(state);
     res.json({ message: 'Pick recorded', pick, nextState: state.currentPick });

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-const DraftBoard = ({ teams, picks, players, totalRounds, currentPick, onUndraft, manualPickTarget, onSelectTarget }) => {
+const DraftBoard = ({ teams, picks, players, totalRounds, currentPick, onUndraft, manualPickTarget, onSelectTarget, settings }) => {
     const activePickRef = useRef(null);
 
     // Auto-scroll to the active pick when it changes
@@ -13,6 +13,22 @@ const DraftBoard = ({ teams, picks, players, totalRounds, currentPick, onUndraft
             });
         }
     }, [currentPick]);
+
+    // Helper to calculate the global pick number
+    const getGlobalPickNumber = (round, teamIndex) => {
+        const numTeams = teams.length;
+        const isSnake = settings?.isSnakeDraft !== false; // Default to true
+        const isEvenRound = round % 2 === 0;
+        
+        let pickInRound;
+        if (isSnake && isEvenRound) {
+            pickInRound = numTeams - teamIndex;
+        } else {
+            pickInRound = teamIndex + 1;
+        }
+        
+        return (round - 1) * numTeams + pickInRound;
+    };
 
     // Helper to find pick for a specific cell
     const getPick = (round, teamIndex) => {
@@ -91,6 +107,7 @@ const DraftBoard = ({ teams, picks, players, totalRounds, currentPick, onUndraft
                                 const active = isCurrentPick(round, tIndex);
                                 const isOnClock = currentPick?.teamIndex === tIndex;
                                 const isManualTarget = manualPickTarget?.round === round && manualPickTarget?.teamId === team.id;
+                                const pickNumber = getGlobalPickNumber(round, tIndex);
                                 
                                 return (
                                     <div 
@@ -103,15 +120,20 @@ const DraftBoard = ({ teams, picks, players, totalRounds, currentPick, onUndraft
                                             ${!player && !active && !isManualTarget && !isOnClock ? 'hover:bg-gray-50' : ''}
                                         `}
                                         onClick={() => {
-                                            if (!player && !active) {
-                                                if (isManualTarget) {
-                                                    onSelectTarget(null);
-                                                } else {
-                                                    onSelectTarget({ round, teamId: team.id, teamIndex: tIndex });
-                                                }
+                                            if (isManualTarget) {
+                                                onSelectTarget(null);
+                                            } else {
+                                                onSelectTarget({ round, teamId: team.id, teamIndex: tIndex, pickNumber });
                                             }
                                         }}
                                     >
+                                        {/* Subtle Pick Number Badge */}
+                                        <div className={`absolute top-0.5 left-1 text-[8px] font-black uppercase tracking-tighter transition-colors z-30
+                                            ${isManualTarget ? 'text-blue-600' : active ? 'text-yellow-600' : 'text-slate-300 group-hover:text-slate-400'}
+                                        `}>
+                                            P{pickNumber}
+                                        </div>
+
                                         {player ? (
                                             <div className={`w-full h-full rounded p-2 flex flex-col justify-center items-center shadow-sm relative cursor-default ${getPositionColor(player.position)}`}>
                                                 <button 

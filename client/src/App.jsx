@@ -213,6 +213,7 @@ function App() {
                         picks={data.picks} 
                         players={data.players}
                         totalRounds={data.settings.totalRounds}
+                        settings={data.settings}
                         currentPick={data.currentPick}
                         onUndraft={handleUndraft}
                         manualPickTarget={manualPickTarget}
@@ -222,9 +223,11 @@ function App() {
                 <div className="w-full lg:w-96 flex-1 lg:flex-none flex flex-col min-h-0 bg-white shadow rounded-lg">
                     <PlayerList 
                         players={availablePlayers}
+                        picks={data.picks}
                         onDraft={handleDraft}
                         currentTeam={manualPickTarget ? data.teams.find(t => t.id === manualPickTarget.teamId) : currentTeam}
                         isManual={!!manualPickTarget}
+                        manualPickTarget={manualPickTarget}
                         isDraftComplete={isDraftComplete}
                     />
                 </div>
