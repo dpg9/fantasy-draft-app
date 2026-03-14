@@ -9,6 +9,7 @@ const TeamSettings = ({ teams, settings, picks, onUpdateSettings, onAddTeam, onU
     const [rosterPositions, setRosterPositions] = useState(settings?.rosterPositions || {
         QB: 1, RB: 2, WR: 2, TE: 1, FLEX: 1, K: 1, DEF: 1, DL: 0, DE: 0, DT: 0, LB: 0, DB: 0, CB: 0, S: 0, IDP: 0, BENCH: 6
     });
+    const [isSnakeDraft, setIsSnakeDraft] = useState(settings?.isSnakeDraft !== false);
     const [isSaving, setIsSaving] = useState(false);
     const [editingTeamId, setEditingTeamId] = useState(null);
     const [editTeamName, setEditTeamName] = useState('');
@@ -35,6 +36,9 @@ const TeamSettings = ({ teams, settings, picks, onUpdateSettings, onAddTeam, onU
         if (settings?.rosterPositions) {
             setRosterPositions(settings.rosterPositions);
         }
+        if (settings?.isSnakeDraft !== undefined) {
+            setIsSnakeDraft(settings.isSnakeDraft);
+        }
     }, [settings]);
 
     const handleUpdateSettings = async () => {
@@ -49,7 +53,8 @@ const TeamSettings = ({ teams, settings, picks, onUpdateSettings, onAddTeam, onU
             await onUpdateSettings({ 
                 draftTitle: draftTitle,
                 timePerPick: newTime,
-                rosterPositions: rosterPositions
+                rosterPositions: rosterPositions,
+                isSnakeDraft: isSnakeDraft
             });
         } catch (err) {
             console.error("Failed to update settings:", err);
@@ -380,21 +385,53 @@ const TeamSettings = ({ teams, settings, picks, onUpdateSettings, onAddTeam, onU
                         </div>
                         
                         <div className="p-6 space-y-10 bg-slate-50/50">
-                            {/* Timer Setting */}
-                            <div className="flex items-center gap-6 p-5 bg-white rounded-2xl border-2 border-slate-200 shadow-sm">
-                                <div className="bg-blue-100 text-2xl p-4 rounded-xl shadow-inner">⏱️</div>
-                                <div className="flex-grow">
-                                    <label className="block text-[10px] font-black text-slate-500 uppercase mb-1 tracking-widest">Time Per Pick</label>
-                                    <div className="flex items-center gap-3">
-                                        <input 
-                                            type="number" 
-                                            className="bg-slate-50 border-2 border-slate-200 p-2 rounded-lg w-28 focus:ring-2 focus:ring-blue-500 outline-none text-xl font-black text-slate-800 text-center"
-                                            value={pickTime}
-                                            onChange={(e) => setPickTime(e.target.value)}
-                                            min="1"
-                                        />
-                                        <span className="text-sm text-slate-400 font-black uppercase tracking-tight">seconds</span>
+                            {/* Draft Format & Timer Settings */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Timer Setting */}
+                                <div className="flex items-center gap-6 p-5 bg-white rounded-2xl border-2 border-slate-200 shadow-sm">
+                                    <div className="bg-blue-100 text-2xl p-4 rounded-xl shadow-inner">⏱️</div>
+                                    <div className="flex-grow">
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase mb-1 tracking-widest">Time Per Pick</label>
+                                        <div className="flex items-center gap-3">
+                                            <input 
+                                                type="number" 
+                                                className="bg-slate-50 border-2 border-slate-200 p-2 rounded-lg w-28 focus:ring-2 focus:ring-blue-500 outline-none text-xl font-black text-slate-800 text-center"
+                                                value={pickTime}
+                                                onChange={(e) => setPickTime(e.target.value)}
+                                                min="1"
+                                            />
+                                            <span className="text-sm text-slate-400 font-black uppercase tracking-tight">seconds</span>
+                                        </div>
                                     </div>
+                                </div>
+
+                                {/* Format Setting */}
+                                <div className="flex items-center gap-6 p-5 bg-white rounded-2xl border-2 border-slate-200 shadow-sm relative overflow-hidden">
+                                    <div className="bg-purple-100 text-2xl p-4 rounded-xl shadow-inner">⚙️</div>
+                                    <div className="flex-grow">
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase mb-1 tracking-widest">Draft Format</label>
+                                        <div className="flex p-1 bg-slate-100 rounded-xl shadow-inner">
+                                            <button 
+                                                onClick={() => !isDraftStarted && setIsSnakeDraft(true)}
+                                                className={`flex-1 py-2 px-3 rounded-lg text-[10px] font-black uppercase transition-all ${isSnakeDraft ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'} ${isDraftStarted ? 'cursor-not-allowed' : ''}`}
+                                                disabled={isDraftStarted}
+                                            >
+                                                🐍 Snake
+                                            </button>
+                                            <button 
+                                                onClick={() => !isDraftStarted && setIsSnakeDraft(false)}
+                                                className={`flex-1 py-2 px-3 rounded-lg text-[10px] font-black uppercase transition-all ${!isSnakeDraft ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'} ${isDraftStarted ? 'cursor-not-allowed' : ''}`}
+                                                disabled={isDraftStarted}
+                                            >
+                                                📏 Linear
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {isDraftStarted && (
+                                        <div className="absolute inset-0 bg-slate-50/40 backdrop-blur-[1px] flex items-center justify-center z-10 cursor-not-allowed">
+                                            <span className="bg-slate-800 text-white text-[8px] font-black uppercase px-2 py-1 rounded shadow-lg">Locked</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
