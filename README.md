@@ -36,6 +36,8 @@ A professional, full-stack web application designed for hosting live, "local par
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/dpg9/fantasy-draft-app
+   ```
+   ```bash
    cd fantasy-draft-app
    ```
 
@@ -78,7 +80,7 @@ To create a single file you can take anywhere (via USB stick) and run on a machi
 
 1. **Create the image file:**
    ```bash
-   docker build -t fantasy-draft-app .
+   docker build -t fantasy-draft-app 
    ```
    ```bash
    docker save fantasy-draft-app > fantasy-draft-app.tar
