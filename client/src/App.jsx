@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchState, draftPlayer, undraftPlayer, addTeam, deleteTeam, uploadPlayers, resetDraft, updateSettings, shuffleTeams, reorderTeams } from './api';
+import { fetchState, draftPlayer, undraftPlayer, addTeam, updateTeam, deleteTeam, uploadPlayers, resetDraft, updateSettings, shuffleTeams, reorderTeams } from './api';
 import DraftBoard from './components/DraftBoard';
 import PlayerList from './components/PlayerList';
 import TeamSettings from './components/TeamSettings';
@@ -104,7 +104,7 @@ function App() {
     <div className="h-screen bg-gray-100 flex flex-col overflow-hidden">
       {/* Header */}
       <header className="bg-slate-800 text-white p-4 flex flex-col md:flex-row justify-between items-center shadow-lg gap-4 sticky top-0 z-50">
-        <h1 className="text-2xl font-bold tracking-wider text-center md:text-left">FANTASY DRAFT '26</h1>
+        <h1 className="text-2xl font-bold tracking-wider text-center md:text-left">{data.settings.draftTitle || "FANTASY DRAFT '26"}</h1>
         
         {data.teams.length > 0 && (
             <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8">
@@ -179,6 +179,7 @@ function App() {
                   alert('Settings updated successfully!');
                 }}
                 onAddTeam={async (team) => { await addTeam(team); loadData(); }}
+                onUpdateTeam={async (id, team) => { await updateTeam(id, team); loadData(); }}
                 onDeleteTeam={async (id) => { await deleteTeam(id); loadData(); }}
                 onShuffleTeams={async () => { await shuffleTeams(); loadData(); }}
                 onReorderTeams={async (teamIds) => { await reorderTeams(teamIds); loadData(); }}

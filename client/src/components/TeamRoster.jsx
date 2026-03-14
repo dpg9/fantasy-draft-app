@@ -15,7 +15,7 @@ const TeamRoster = ({ teams, picks, players, rosterPositions }) => {
 
     // Build the roster structure based on settings
     const rosterSlots = [];
-    const positionsToProcess = ['QB', 'RB', 'WR', 'TE', 'FLEX', 'K', 'DEF', 'BENCH'];
+    const positionsToProcess = ['QB', 'RB', 'WR', 'TE', 'FLEX', 'K', 'DEF', 'DL', 'DE', 'DT', 'LB', 'DB', 'CB', 'S', 'IDP', 'BENCH'];
     
     positionsToProcess.forEach(pos => {
         const count = rosterPositions[pos] || 0;
@@ -24,23 +24,12 @@ const TeamRoster = ({ teams, picks, players, rosterPositions }) => {
         }
     });
 
-    // Helper to see if a player fits a slot
-    const fitsSlot = (playerPos, slotName) => {
-        if (playerPos === slotName) return true;
-        if (slotName === 'FLEX' && ['RB', 'WR', 'TE'].includes(playerPos)) return true;
-        if (slotName === 'BENCH') return true;
-        return false;
-    };
-
-    // Assign players to slots
-    const unassignedPlayers = [];
-    
     // Create a copy of players to assign
     let remainingPlayers = [...teamPlayers];
 
-    // Priority 1: Exact matches (QB to QB)
+    // Priority 1: Exact matches (QB to QB, LB to LB, etc.)
     rosterSlots.forEach(slot => {
-        if (slot.slot !== 'FLEX' && slot.slot !== 'BENCH' && !slot.player) {
+        if (!['FLEX', 'IDP', 'BENCH'].includes(slot.slot) && !slot.player) {
             const playerIndex = remainingPlayers.findIndex(p => p.position === slot.slot);
             if (playerIndex !== -1) {
                 slot.player = remainingPlayers[playerIndex];
@@ -49,7 +38,7 @@ const TeamRoster = ({ teams, picks, players, rosterPositions }) => {
         }
     });
 
-    // Priority 2: FLEX matches
+    // Priority 2: FLEX matches (RB, WR, TE)
     rosterSlots.forEach(slot => {
         if (slot.slot === 'FLEX' && !slot.player) {
             const playerIndex = remainingPlayers.findIndex(p => ['RB', 'WR', 'TE'].includes(p.position));
@@ -60,7 +49,18 @@ const TeamRoster = ({ teams, picks, players, rosterPositions }) => {
         }
     });
 
-    // Priority 3: BENCH
+    // Priority 3: IDP FLEX matches (DL, LB, DB)
+    rosterSlots.forEach(slot => {
+        if (slot.slot === 'IDP' && !slot.player) {
+            const playerIndex = remainingPlayers.findIndex(p => ['DL', 'DE', 'DT', 'LB', 'DB', 'CB', 'S'].includes(p.position));
+            if (playerIndex !== -1) {
+                slot.player = remainingPlayers[playerIndex];
+                remainingPlayers.splice(playerIndex, 1);
+            }
+        }
+    });
+
+    // Priority 4: BENCH
     rosterSlots.forEach(slot => {
         if (slot.slot === 'BENCH' && !slot.player) {
             if (remainingPlayers.length > 0) {
@@ -81,7 +81,15 @@ const TeamRoster = ({ teams, picks, players, rosterPositions }) => {
             'TE': 'bg-orange-500 text-white',
             'K': 'bg-purple-500 text-white',
             'DEF': 'bg-yellow-600 text-white',
-            'DST': 'bg-yellow-600 text-white'
+            'DST': 'bg-yellow-600 text-white',
+            'DL': 'bg-cyan-600 text-white',
+            'DE': 'bg-cyan-600 text-white',
+            'DT': 'bg-cyan-700 text-white',
+            'LB': 'bg-teal-600 text-white',
+            'DB': 'bg-indigo-600 text-white',
+            'CB': 'bg-indigo-600 text-white',
+            'S': 'bg-indigo-700 text-white',
+            'IDP': 'bg-zinc-600 text-white'
         };
         return colors[pos?.toUpperCase()] || 'bg-gray-200 text-gray-800';
     };

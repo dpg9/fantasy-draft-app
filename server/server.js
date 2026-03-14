@@ -31,6 +31,7 @@ const defaultState = {
     picks: [], // { round, pickNumber, teamId, playerId }
     currentPick: { round: 1, pickNumber: 1, teamIndex: 0 },
     settings: {
+        draftTitle: "FANTASY DRAFT '26",
         totalRounds: 15,
         timePerPick: 120, // seconds
         isSnakeDraft: true,
@@ -42,6 +43,14 @@ const defaultState = {
             FLEX: 1,
             K: 1,
             DEF: 1,
+            DL: 0,
+            DE: 0,
+            DT: 0,
+            LB: 0,
+            DB: 0,
+            CB: 0,
+            S: 0,
+            IDP: 0,
             BENCH: 6
         }
     }
