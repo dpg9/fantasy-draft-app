@@ -260,7 +260,7 @@ function App() {
                 }}
             />
         ) : view === 'rosters' ? (
-            <div className="h-full w-full max-w-4xl mx-auto">
+            <div className="h-full w-full">
                 <TeamRoster 
                     teams={data.teams}
                     picks={data.picks}
