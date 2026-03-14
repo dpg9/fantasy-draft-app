@@ -1,70 +1,68 @@
 # Fantasy Sports Draft Web Application
 
-A modern, web-based tool for hosting live fantasy sports drafts (Snake Draft format). Built with React and Node.js.
+A professional, full-stack web application designed for hosting live, "local party" fantasy sports drafts. Built for speed, reliability, and 100% offline capability.
 
-## Features
--   **Live Draft Board:** Visual grid showing rounds and team picks.
--   **Player Database:** Upload custom player rankings via CSV.
--   **Team Management:** Add teams and randomize draft order.
--   **Drafting Interface:** Search and filter players to draft.
--   **Timer:** Countdown timer for each pick.
--   **Auto-Save:** Draft state is persisted to a local JSON file.
+## 🚀 Key Features
 
-## Prerequisites
--   Node.js (v18+)
--   npm
+### 🏈 Elite Drafting Experience
+- **Live Draft Board:** A high-contrast, auto-scrolling grid that tracks the current team on the clock.
+- **Intelligent Flow:** Automated "Hole-Filling" logic ensures the draft always stays on track, even if you manually adjust picks.
+- **Global Pick Tracking:** Every square displays its overall pick number (P1, P2...), dynamically adjusting for **Snake Draft** or linear formats.
+- **Draft Complete State:** Celebratory UI once the draft finishes, with a one-click **CSV Download** of the full results.
 
-## Installation
+### 📋 Team & Roster Management
+- **Draft Command Center:** A streamlined settings hub to manage teams, randomize orders, or manually reorder via **Drag & Drop**.
+- **Deep Roster Customization:** Define exact limits for standard positions (QB, RB, WR, TE, K) and full **IDP Support** (DL, DE, DT, LB, DB, CB, S).
+- **Roster Overview:** A dedicated page to view team lineups, switchable between **Position View** (smart-filled slots) or **Pick Order** (chronological).
+- **All-Teams View:** A responsive, full-screen grid to compare every team in the league side-by-side.
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <repository_url>
-    cd fantasy-draft-app
-    ```
+### 🛡️ Built for Stability
+- **Atomic Data Protection:** Zero-risk saving system ensures your draft data is never corrupted, even during sudden power loss.
+- **Uptime Safety Net:** Global error handlers prevent the server from crashing during live events.
+- **100% Offline-First:** Runs entirely on your local machine. No internet required for draft day once your player database is loaded.
 
-2.  **Install Backend Dependencies:**
-    ```bash
-    cd server
-    npm install
-    ```
+### 📱 Responsive Design
+- **Cross-Platform:** Optimized for Desktops, Tablets, and Phones.
+- **Sticky UI:** Headers, team names, and search bars stay anchored while you scroll through long drafts.
 
-3.  **Install Frontend Dependencies:**
-    ```bash
-    cd ../client
-    npm install
-    ```
+---
 
-## Usage
+## 🛠️ Prerequisites
+- **Node.js** (v20+ recommended)
+- **npm**
 
-You need to run both the backend API and the frontend React app.
+---
 
-### 1. Start the Backend
-From the `server` directory:
-```bash
-node server.js
-```
-The server will run on `http://localhost:5001`.
+## 💻 Installation & Setup
 
-### 2. Start the Frontend
-From the `client` directory:
-```bash
-npm run dev
-```
-Open your browser to `http://localhost:5173`.
+1. **Clone the repository:**
+   ```bash
+   git clone <repository_url>
+   cd fantasy-draft-app
+   ```
 
-## Setup Guide
+2. **Quick Start (Recommended):**
+   Run the provided developer script to launch both the backend and frontend simultaneously:
+   ```bash
+   ./start-dev.sh
+   ```
 
-1.  Open the app in your browser.
-2.  Click **Settings**.
-3.  Add your Teams (e.g., "Team Alpha", "The fantasy Guru").
-4.  Upload a Player CSV file.
-    -   **CSV Format:** `Name,Position,Team,Rank`
-    -   *Example included in `examples/players.csv` (You'll need to create this)*.
-5.  Go back to **Draft Board**.
-6.  Start drafting!
+3. **Manual Setup:**
+   - **Backend:** `cd server && npm install && node server.js` (Runs on port 5001)
+   - **Frontend:** `cd client && npm install && npm run dev` (Runs on port 5173)
 
-## Deployment (Proxmox)
-To deploy on a Proxmox server, you can use Docker or run it as a Node service.
+---
 
-### Docker (Recommended)
-*Coming soon in Phase 4*
+## 📂 Data Setup
+
+To populate your draft, go to the **Settings** page and upload a CSV file.
+- **Required Columns:** `id, name, position, team, rank`
+- **Example File:** See `examples/full_nfl_roster.csv` for a pre-formatted 2024 NFL roster.
+
+---
+
+## 🖥️ Running on Windows
+The app is fully compatible with Windows. For the easiest experience, use **Git Bash** to run the `./start-dev.sh` script, or run the server and client in two separate PowerShell/Command Prompt windows.
+
+## 🐳 Docker Deployment
+*Detailed Dockerfile and Docker-Compose instructions coming soon for Proxmox and Home Server hosting.*
