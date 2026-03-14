@@ -35,7 +35,7 @@ A professional, full-stack web application designed for hosting live, "local par
 
 1. **Clone the repository:**
    ```bash
-   git clone <repository_url>
+   git clone https://github.com/dpg9/fantasy-draft-app
    cd fantasy-draft-app
    ```
 
