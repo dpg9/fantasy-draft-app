@@ -44,7 +44,7 @@ function App() {
     if (manualPickTarget) {
       targetTeamId = manualPickTarget.teamId;
       targetRound = manualPickTarget.round;
-      targetPickNumber = (manualPickTarget.round - 1) * data.teams.length + manualPickTarget.teamIndex + 1;
+      targetPickNumber = manualPickTarget.pickNumber;
     } else {
       const currentTeam = data.teams[data.currentPick.teamIndex];
       if (!currentTeam) return;

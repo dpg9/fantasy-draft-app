@@ -120,6 +120,12 @@ const DraftBoard = ({ teams, picks, players, totalRounds, currentPick, onUndraft
                                             ${!player && !active && !isManualTarget && !isOnClock ? 'hover:bg-gray-50' : ''}
                                         `}
                                         onClick={() => {
+                                            if (active) {
+                                                // If clicking the current automated pick, we don't need manual mode
+                                                // Just clear any existing manual target to return to standard drafting
+                                                onSelectTarget(null);
+                                                return;
+                                            }
                                             if (isManualTarget) {
                                                 onSelectTarget(null);
                                             } else {
