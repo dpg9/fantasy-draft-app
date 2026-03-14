@@ -14,14 +14,17 @@ WORKDIR /app/server
 COPY server/package*.json ./
 RUN npm install --production
 
-# Copy server code directly into the workdir
+# Copy server code
 COPY server/ ./
 
-# Copy built frontend to the public folder inside the server workdir
+# Copy built frontend to the public folder
 COPY --from=client-builder /app/client/dist ./public
 
-# Ensure directories exist
-RUN mkdir -p data uploads
+# Set permissions for data and uploads
+RUN mkdir -p data uploads && chown -R node:node /app/server
+
+# Switch to non-root user for security
+USER node
 
 # Set environment variables
 ENV NODE_ENV=production
