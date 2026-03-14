@@ -79,11 +79,15 @@ To create a single file you can take anywhere (via USB stick) and run on a machi
 1. **Create the image file:**
    ```bash
    docker build -t fantasy-draft-app .
+   ```
+   ```bash
    docker save fantasy-draft-app > fantasy-draft-app.tar
    ```
 2. **On the target machine (offline):**
    ```bash
    docker load < fantasy-draft-app.tar
+   ```
+   ```bash
    docker run -d -p 5001:5001 --name my-draft fantasy-draft-app
    ```
 
