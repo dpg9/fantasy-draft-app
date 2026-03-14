@@ -100,6 +100,41 @@ function App() {
   const isDraftComplete = data.picks.length >= (data.teams.length * data.settings.totalRounds) && data.teams.length > 0;
   const currentTeam = data.teams[data.currentPick.teamIndex];
 
+  const handleDownloadResults = () => {
+    const headers = ['Round', 'Pick', 'Team', 'Owner', 'Player', 'Position', 'NFL Team'];
+    const rows = data.picks.map(pick => {
+      const team = data.teams.find(t => t.id === pick.teamId);
+      const player = data.players.find(p => p.id === pick.playerId);
+      return [
+        pick.round,
+        pick.pickNumber,
+        `"${team?.name || 'Unknown'}"`,
+        `"${team?.owner || 'Unknown'}"`,
+        `"${player?.name || 'Unknown'}"`,
+        player?.position || 'Unknown',
+        player?.team || 'Unknown'
+      ];
+    });
+
+    rows.sort((a, b) => a[1] - b[1]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    const fileName = (data.settings.draftTitle || 'Draft').replace(/[^a-z0-9]/gi, '_');
+    link.setAttribute('download', `${fileName}_Results.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="h-screen bg-gray-100 flex flex-col overflow-hidden">
       {/* Header */}
@@ -109,10 +144,18 @@ function App() {
         {data.teams.length > 0 && (
             <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8">
                 {isDraftComplete ? (
-                    <div className="text-center animate-bounce">
-                        <div className="text-xl md:text-3xl font-black text-green-400 uppercase tracking-widest drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]">
-                            Draft Complete!
+                    <div className="flex items-center gap-6">
+                        <div className="text-center animate-bounce">
+                            <div className="text-xl md:text-3xl font-black text-green-400 uppercase tracking-widest drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]">
+                                Draft Complete!
+                            </div>
                         </div>
+                        <button 
+                            onClick={handleDownloadResults}
+                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-black uppercase tracking-widest text-xs shadow-lg transition-all active:scale-95 border-b-4 border-green-800 flex items-center gap-2"
+                        >
+                            <span>📥</span> Download Results
+                        </button>
                     </div>
                 ) : currentTeam && (
                     <>
@@ -188,13 +231,33 @@ function App() {
                 onAddTeam={async (team) => { await addTeam(team); loadData(); }}
                 onUpdateTeam={async (id, team) => { await updateTeam(id, team); loadData(); }}
                 onDeleteTeam={async (id) => { await deleteTeam(id); loadData(); }}
-                onBulkAddTeams={async (count) => { await bulkAddTeams(count); loadData(); }}
-                onClearAllTeams={async () => { await clearAllTeams(); loadData(); }}
+                onBulkAddTeams={async (count) => { 
+                  await bulkAddTeams(count); 
+                  setLastPickTime(Date.now());
+                  setIsPaused(true);
+                  loadData(); 
+                }}
+                onClearAllTeams={async () => { 
+                  await clearAllTeams(); 
+                  setLastPickTime(Date.now());
+                  setIsPaused(true);
+                  loadData(); 
+                }}
                 onShuffleTeams={async () => { await shuffleTeams(); loadData(); }}
                 onReorderTeams={async (teamIds) => { await reorderTeams(teamIds); loadData(); }}
                 onUpload={handleUpload}
-                onClearPicks={async () => { await clearPicks(); loadData(); }}
-                onReset={async () => { await resetDraft(); loadData(); }}
+                onClearPicks={async () => { 
+                  await clearPicks(); 
+                  setLastPickTime(Date.now());
+                  setIsPaused(true);
+                  loadData(); 
+                }}
+                onReset={async () => { 
+                  await resetDraft(); 
+                  setLastPickTime(Date.now());
+                  setIsPaused(true);
+                  loadData(); 
+                }}
             />
         ) : view === 'rosters' ? (
             <div className="h-full w-full max-w-4xl mx-auto">

@@ -138,8 +138,8 @@ const TeamSettings = ({ teams, settings, picks, onUpdateSettings, onAddTeam, onU
         onReorderTeams(newTeams.map(t => t.id));
     };
 
-    const offensivePositions = ['QB', 'RB', 'WR', 'TE', 'FLEX', 'BENCH'];
-    const defensivePositions = ['K', 'DEF', 'DL', 'DE', 'DT', 'LB', 'DB', 'CB', 'S', 'IDP'];
+    const offensivePositions = ['QB', 'RB', 'WR', 'TE', 'FLEX', 'K', 'BENCH'];
+    const defensivePositions = ['DEF', 'DL', 'DE', 'DT', 'LB', 'DB', 'CB', 'S', 'IDP'];
 
     return (
         <div className="flex flex-col gap-6 h-full overflow-y-auto pb-10 px-2">

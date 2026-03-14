@@ -68,7 +68,7 @@ const DraftBoard = ({ teams, picks, players, totalRounds, currentPick, onUndraft
     return (
         <div className="p-4 h-full">
             <div className="min-w-max relative">
-                <div className="flex sticky top-0 z-20 bg-white border-b-2 border-gray-200">
+                <div className="flex sticky top-0 z-40 bg-white border-b-2 border-gray-200 shadow-sm">
                     <div className="w-16 flex-shrink-0 bg-white"></div>
                     {teams.map((team, index) => {
                         const isOnClock = currentPick?.teamIndex === index;
