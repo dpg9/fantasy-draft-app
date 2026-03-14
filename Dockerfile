@@ -6,22 +6,22 @@ RUN npm install
 COPY client/ ./
 RUN npm run build
 
-# Stage 2: Setup the Backend & Final Image
+# Stage 2: Setup the Backend
 FROM node:20-slim
-WORKDIR /app
+WORKDIR /app/server
 
-# Install production dependencies for server
-COPY server/package*.json ./server/
-RUN cd server && npm install --production
+# Install server dependencies
+COPY server/package*.json ./
+RUN npm install --production
 
-# Copy server code
-COPY server/ ./server/
+# Copy server code directly into the workdir
+COPY server/ ./
 
-# Copy built frontend from Stage 1 to server's public folder
-COPY --from=client-builder /app/client/dist ./server/public
+# Copy built frontend to the public folder inside the server workdir
+COPY --from=client-builder /app/client/dist ./public
 
-# Create data and uploads directories
-RUN mkdir -p /app/server/data /app/server/uploads
+# Ensure directories exist
+RUN mkdir -p data uploads
 
 # Set environment variables
 ENV NODE_ENV=production
@@ -31,4 +31,4 @@ ENV PORT=5001
 EXPOSE 5001
 
 # Start the server
-CMD ["node", "server/server.js"]
+CMD ["node", "server.js"]

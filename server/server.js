@@ -7,7 +7,7 @@ const multer = require('multer');
 const csv = require('csv-parser');
 
 const app = express();
-const PORT = 5001;
+const PORT = process.env.PORT || 5001;
 const DATA_FILE = path.join(__dirname, 'data', 'draft-data.json');
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 
@@ -359,17 +359,21 @@ app.post('/api/reset', (req, res) => {
 // In production, the built React app is placed in the 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Catch-all route to serve the React index.html for any non-API requests
-// This enables client-side routing
-app.get('*', (req, res) => {
-    // If request is not for an API route, serve the frontend
-    if (!req.url.startsWith('/api')) {
-        const indexPath = path.join(__dirname, 'public', 'index.html');
-        if (fs.existsSync(indexPath)) {
-            return res.sendFile(indexPath);
-        }
+// Catch-all middleware to serve the React index.html for any non-API requests
+// This handles client-side routing and is compatible with Express 5
+app.use((req, res, next) => {
+    // If request is for an API route that wasn't handled, let it 404
+    if (req.url.startsWith('/api')) {
+        return res.status(404).json({ error: 'API route not found' });
     }
-    res.status(404).json({ error: 'Not Found' });
+    
+    // Otherwise, serve index.html for the React app
+    const indexPath = path.join(__dirname, 'public', 'index.html');
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        res.status(404).send('Frontend build not found');
+    }
 });
 
 // Global Error Handlers (The "Uptime Safety Net")
@@ -382,6 +386,6 @@ process.on('unhandledRejection', (reason, promise) => {
     console.error('SERVER CRASH PREVENTED: Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on http://0.0.0.0:${PORT}`);
 });
