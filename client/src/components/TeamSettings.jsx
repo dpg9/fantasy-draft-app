@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const TeamSettings = ({ teams, settings, picks, onUpdateSettings, onAddTeam, onUpdateTeam, onDeleteTeam, onBulkAddTeams, onClearAllTeams, onShuffleTeams, onReorderTeams, onUpload, onClearPicks, onReset }) => {
+const TeamSettings = ({ teams, settings, picks, onUpdateSettings, onAddTeam, onUpdateTeam, onDeleteTeam, onBulkAddTeams, onBulkSetTeams, onClearAllTeams, onShuffleTeams, onReorderTeams, onUpload, onClearPicks, onReset }) => {
     const [newTeamName, setNewTeamName] = useState('');
     const [newOwnerName, setNewOwnerName] = useState('');
     const [newAvatarUrl, setNewAvatarUrl] = useState('');
@@ -193,19 +193,19 @@ const TeamSettings = ({ teams, settings, picks, onUpdateSettings, onAddTeam, onU
                                         onClick={() => { if(confirm('Clear all current teams?')) onClearAllTeams(); }}
                                         className="bg-white text-red-600 border-2 border-red-100 hover:border-red-200 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tight transition-all active:scale-95 shadow-sm"
                                     >
-                                        🗑️ Clear All Teams
+                                        🗑️ Clear All
                                     </button>
                                     <button 
-                                        onClick={() => onBulkAddTeams(10)}
+                                        onClick={() => { if(confirm('Replace current teams with 10 placeholders?')) onBulkSetTeams(10); }}
                                         className="bg-white text-blue-600 border-2 border-blue-100 hover:border-blue-200 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tight transition-all active:scale-95 shadow-sm"
                                     >
-                                        ➕ Add 10 Teams
+                                        🔢 Set to 10 Teams
                                     </button>
                                     <button 
-                                        onClick={() => onBulkAddTeams(12)}
+                                        onClick={() => { if(confirm('Replace current teams with 12 placeholders?')) onBulkSetTeams(12); }}
                                         className="bg-white text-blue-600 border-2 border-blue-100 hover:border-blue-200 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tight transition-all active:scale-95 shadow-sm"
                                     >
-                                        ➕ Add 12 Teams
+                                        🔢 Set to 12 Teams
                                     </button>
                                 </div>
                             )}

@@ -57,6 +57,15 @@ export const bulkAddTeams = async (count) => {
     return handleResponse(res);
 };
 
+export const bulkSetTeams = async (count) => {
+    const res = await fetch(`${API_URL}/teams/bulk-set`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count }),
+    });
+    return handleResponse(res);
+};
+
 export const clearAllTeams = async () => {
     const res = await fetch(`${API_URL}/teams/clear-all`, {
         method: 'POST',

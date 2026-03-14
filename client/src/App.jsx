@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchState, draftPlayer, undraftPlayer, addTeam, updateTeam, deleteTeam, bulkAddTeams, clearAllTeams, uploadPlayers, resetDraft, clearPicks, updateSettings, shuffleTeams, reorderTeams } from './api';
+import { fetchState, draftPlayer, undraftPlayer, addTeam, updateTeam, deleteTeam, bulkAddTeams, bulkSetTeams, clearAllTeams, uploadPlayers, resetDraft, clearPicks, updateSettings, shuffleTeams, reorderTeams } from './api';
 import DraftBoard from './components/DraftBoard';
 import PlayerList from './components/PlayerList';
 import TeamSettings from './components/TeamSettings';
@@ -233,6 +233,12 @@ function App() {
                 onDeleteTeam={async (id) => { await deleteTeam(id); loadData(); }}
                 onBulkAddTeams={async (count) => { 
                   await bulkAddTeams(count); 
+                  setLastPickTime(Date.now());
+                  setIsPaused(true);
+                  loadData(); 
+                }}
+                onBulkSetTeams={async (count) => { 
+                  await bulkSetTeams(count); 
                   setLastPickTime(Date.now());
                   setIsPaused(true);
                   loadData(); 

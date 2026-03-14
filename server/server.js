@@ -77,10 +77,18 @@ const loadData = () => {
 };
 
 const saveData = (data) => {
+    const TEMP_FILE = `${DATA_FILE}.tmp`;
     try {
-        fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+        // Atomic write: Write to a temporary file first, then rename it
+        // This prevents file corruption if the power goes out mid-save
+        fs.writeFileSync(TEMP_FILE, JSON.stringify(data, null, 2), 'utf8');
+        fs.renameSync(TEMP_FILE, DATA_FILE);
     } catch (err) {
-        console.error("Error saving data file:", err);
+        console.error("CRITICAL: Error saving data file:", err);
+        // Attempt to cleanup temp file if rename failed
+        if (fs.existsSync(TEMP_FILE)) {
+            try { fs.unlinkSync(TEMP_FILE); } catch(e) {}
+        }
     }
 };
 
@@ -134,11 +142,12 @@ app.post('/api/teams/bulk-add', (req, res) => {
     const { count } = req.body;
     const state = loadData();
     const startCount = state.teams.length;
+    const timestamp = Date.now();
     
     for (let i = 0; i < count; i++) {
         const num = startCount + i + 1;
         state.teams.push({
-            id: `team-${Date.now()}-${i}`,
+            id: `team-${timestamp}-${i}`,
             name: `Team ${num}`,
             owner: `Owner ${num}`,
             avatar: "",
@@ -147,6 +156,24 @@ app.post('/api/teams/bulk-add', (req, res) => {
     }
     saveData(state);
     res.json({ message: `${count} teams added`, teams: state.teams });
+});
+
+app.post('/api/teams/bulk-set', (req, res) => {
+    const { count } = req.body;
+    const state = loadData();
+    const timestamp = Date.now();
+    
+    // Replace all existing teams with a new set
+    state.teams = Array.from({ length: count }).map((_, i) => ({
+        id: `team-${timestamp}-${i}`,
+        name: `Team ${i + 1}`,
+        owner: `Owner ${i + 1}`,
+        avatar: "",
+        draftOrder: i + 1
+    }));
+    
+    saveData(state);
+    res.json({ message: `Teams set to ${count}`, teams: state.teams });
 });
 
 app.post('/api/teams/clear-all', (req, res) => {
@@ -326,6 +353,16 @@ app.post('/api/clear-picks', (req, res) => {
 app.post('/api/reset', (req, res) => {
     saveData(defaultState);
     res.json({ message: "Draft state reset", state: defaultState });
+});
+
+// Global Error Handlers (The "Uptime Safety Net")
+// This prevents the server from crashing if an unexpected logic error occurs
+process.on('uncaughtException', (err) => {
+    console.error('SERVER CRASH PREVENTED: Uncaught Exception:', err.stack || err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('SERVER CRASH PREVENTED: Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
 app.listen(PORT, () => {
